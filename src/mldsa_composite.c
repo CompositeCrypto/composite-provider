@@ -1,30 +1,26 @@
-#include "composite_provider.h"
-#include <openssl/core_names.h>
+#include "mldsa_composite.h"
 
-/*
- * ML-DSA Composite Signature Algorithms
- * 
- * This file implements the algorithm dispatch for ML-DSA composite signatures.
- * Each composite algorithm combines ML-DSA (Dilithium) with a traditional algorithm.
- *
- * Supported combinations:
- * - ML-DSA-44 + RSA-2048
- * - ML-DSA-44 + ECDSA-P256
- * - ML-DSA-65 + RSA-3072
- * - ML-DSA-65 + ECDSA-P384
- * - ML-DSA-87 + RSA-4096
- * - ML-DSA-87 + ECDSA-P521
- */
+// ========================
+// Function implementations
+// ========================
 
 const OSSL_ALGORITHM *composite_signature_algorithms(void *provctx)
 {
     (void)provctx; /* Unused */
     static const OSSL_ALGORITHM algorithms[] = {
+        { COMPOSITE_MLDSA44_RSA2048_PSS_NAME, "provider=composite",
+          composite_mldsa44_rsa2048_signature_functions, 
+          "Composite ML-DSA-44 with RSA-2048 PSS SHA-256" },
+
         { COMPOSITE_MLDSA44_RSA2048_NAME, "provider=composite",
           composite_mldsa44_rsa2048_signature_functions, 
           "Composite ML-DSA-44 with RSA-2048" },
         
-        { COMPOSITE_MLDSA44_ECDSA_P256_NAME, "provider=composite",
+        { COMPOSITE_MLDSA44_ED25519_NAME, "provider=composite",
+          composite_mldsa44_ecdsa_p256_signature_functions,
+          "Composite ML-DSA-44 with ED25519" },
+
+        { COMPOSITE_MLDSA44_NISTP256_NAME, "provider=composite",
           composite_mldsa44_ecdsa_p256_signature_functions,
           "Composite ML-DSA-44 with ECDSA-P256" },
         

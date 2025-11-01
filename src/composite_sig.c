@@ -1,22 +1,9 @@
-#include "composite_provider.h"
-#include <openssl/core_names.h>
-#include <openssl/params.h>
-#include <string.h>
-#include <stdlib.h>
+#include "composite_sig.h"
 
-/* Placeholder signature sizes (these would be calculated based on component algorithms) */
-#define COMPOSITE_SIG_SIZE 4096  /* Placeholder: ML-DSA + traditional signature */
+                    // ============================
+                    // Static function declarations
+                    // ============================
 
-/* Signature context structure */
-typedef struct composite_sig_ctx_st {
-    COMPOSITE_PROV_CTX *provctx;
-    const char *algorithm_name;
-    /* Key material would go here */
-    unsigned char *sig_buffer;
-    size_t sig_buffer_len;
-} COMPOSITE_SIG_CTX;
-
-/* Signature function implementations */
 static OSSL_FUNC_signature_newctx_fn composite_sig_newctx;
 static OSSL_FUNC_signature_freectx_fn composite_sig_freectx;
 static OSSL_FUNC_signature_sign_init_fn composite_sig_sign_init;
@@ -30,6 +17,10 @@ static OSSL_FUNC_signature_digest_verify_fn composite_sig_digest_verify;
 static OSSL_FUNC_signature_get_ctx_params_fn composite_sig_get_ctx_params;
 static OSSL_FUNC_signature_set_ctx_params_fn composite_sig_set_ctx_params;
 
+                    // ==================================
+                    // Signature function implementations
+                    // ==================================
+
 static void *composite_sig_newctx(void *provctx, const char *propq)
 {
     COMPOSITE_SIG_CTX *ctx = malloc(sizeof(COMPOSITE_SIG_CTX));
@@ -39,7 +30,7 @@ static void *composite_sig_newctx(void *provctx, const char *propq)
         return NULL;
 
     memset(ctx, 0, sizeof(COMPOSITE_SIG_CTX));
-    ctx->provctx = (COMPOSITE_PROV_CTX *)provctx;
+    ctx->provctx = (COMPOSITE_CTX *)provctx;
     
     return ctx;
 }
@@ -173,100 +164,111 @@ static int composite_sig_set_ctx_params(void *ctx, const OSSL_PARAM params[])
     return 1;
 }
 
-/* Dispatch tables for each composite signature algorithm */
-/* Note: All algorithms currently use the same implementation functions */
-const OSSL_DISPATCH composite_mldsa44_rsa2048_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+                        // ===============
+                        // Dispatch Tables
+                        // ===============
 
-const OSSL_DISPATCH composite_mldsa44_ecdsa_p256_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+SIG_DISPATCH_TABLE(mldsa44, rsa2048);
+SIG_DISPATCH_TABLE(mldsa44, rsapss);
+SIG_DISPATCH_TABLE(mldsa44, ecdsa_p256);
+SIG_DISPATCH_TABLE(mldsa65, rsa3072);
+SIG_DISPATCH_TABLE(mldsa65, ecdsa_p384);
+SIG_DISPATCH_TABLE(mldsa87, rsa4096);
+SIG_DISPATCH_TABLE(mldsa87, ecdsa_p521);
 
-const OSSL_DISPATCH composite_mldsa65_rsa3072_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+// Use a custom dispatch table if special functions are needed
+// const OSSL_DISPATCH composite_mldsa44_rsa2048_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
 
-const OSSL_DISPATCH composite_mldsa65_ecdsa_p384_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+// const OSSL_DISPATCH composite_mldsa44_ecdsa_p256_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
 
-const OSSL_DISPATCH composite_mldsa87_rsa4096_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+// const OSSL_DISPATCH composite_mldsa65_rsa3072_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
 
-const OSSL_DISPATCH composite_mldsa87_ecdsa_p521_signature_functions[] = {
-    { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
-    { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
-    { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
-    { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
-    { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
-    { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
-    { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
-    { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
-    { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
-    { 0, NULL }
-};
+// const OSSL_DISPATCH composite_mldsa65_ecdsa_p384_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
+
+// const OSSL_DISPATCH composite_mldsa87_rsa4096_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
+
+// const OSSL_DISPATCH composite_mldsa87_ecdsa_p521_signature_functions[] = {
+//     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
+//     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
+//     { OSSL_FUNC_SIGNATURE_SIGN_INIT, (void (*)(void))composite_sig_sign_init },
+//     { OSSL_FUNC_SIGNATURE_SIGN, (void (*)(void))composite_sig_sign },
+//     { OSSL_FUNC_SIGNATURE_VERIFY_INIT, (void (*)(void))composite_sig_verify_init },
+//     { OSSL_FUNC_SIGNATURE_VERIFY, (void (*)(void))composite_sig_verify },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN_INIT, (void (*)(void))composite_sig_digest_sign_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_SIGN, (void (*)(void))composite_sig_digest_sign },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init },
+//     { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify },
+//     { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params },
+//     { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params },
+//     { 0, NULL }
+// };
