@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* Placeholder KEM sizes (these would be calculated based on component algorithms) */
+#define COMPOSITE_KEM_CT_SIZE 2048  /* Placeholder: ML-KEM + ECDH ciphertext */
+#define COMPOSITE_KEM_SS_SIZE 64    /* Placeholder: combined shared secret */
+
 /* KEM context structure */
 typedef struct composite_kem_ctx_st {
     COMPOSITE_PROV_CTX *provctx;
@@ -78,21 +82,21 @@ static int composite_kem_encapsulate(void *ctx, unsigned char *ct, size_t *ctlen
     
     if (ct == NULL) {
         /* Return required ciphertext size */
-        *ctlen = 2048; /* Placeholder size */
+        *ctlen = COMPOSITE_KEM_CT_SIZE;
     }
 
     if (ss == NULL) {
         /* Return required shared secret size */
-        *sslen = 64; /* Placeholder: typically 32 bytes from ML-KEM + 32 from ECDH */
+        *sslen = COMPOSITE_KEM_SS_SIZE;
     }
 
     if (ct != NULL && ss != NULL) {
         /* Placeholder: actual encapsulation would happen here */
-        memset(ct, 0, 2048);
-        *ctlen = 2048;
+        memset(ct, 0, COMPOSITE_KEM_CT_SIZE);
+        *ctlen = COMPOSITE_KEM_CT_SIZE;
         
-        memset(ss, 0, 64);
-        *sslen = 64;
+        memset(ss, 0, COMPOSITE_KEM_SS_SIZE);
+        *sslen = COMPOSITE_KEM_SS_SIZE;
     }
     
     return 1;
@@ -123,13 +127,13 @@ static int composite_kem_decapsulate(void *ctx, unsigned char *ss, size_t *sslen
 
     if (ss == NULL) {
         /* Return required shared secret size */
-        *sslen = 64;
+        *sslen = COMPOSITE_KEM_SS_SIZE;
         return 1;
     }
 
     /* Placeholder: actual decapsulation would happen here */
-    memset(ss, 0, 64);
-    *sslen = 64;
+    memset(ss, 0, COMPOSITE_KEM_SS_SIZE);
+    *sslen = COMPOSITE_KEM_SS_SIZE;
     
     return 1;
 }
@@ -151,6 +155,7 @@ static int composite_kem_set_ctx_params(void *ctx, const OSSL_PARAM params[])
 }
 
 /* Dispatch tables for each composite KEM algorithm */
+/* Note: All algorithms currently use the same implementation functions */
 const OSSL_DISPATCH composite_mlkem512_ecdh_p256_kem_functions[] = {
     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },

@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* Placeholder signature sizes (these would be calculated based on component algorithms) */
+#define COMPOSITE_SIG_SIZE 4096  /* Placeholder: ML-DSA + traditional signature */
+
 /* Signature context structure */
 typedef struct composite_sig_ctx_st {
     COMPOSITE_PROV_CTX *provctx;
@@ -85,16 +88,16 @@ static int composite_sig_sign(void *ctx, unsigned char *sig, size_t *siglen,
     
     if (sig == NULL) {
         /* Return required signature size */
-        *siglen = 4096; /* Placeholder size */
+        *siglen = COMPOSITE_SIG_SIZE;
         return 1;
     }
 
-    if (sigsize < 4096)
+    if (sigsize < COMPOSITE_SIG_SIZE)
         return 0;
 
     /* Placeholder: actual signing would happen here */
-    memset(sig, 0, 4096);
-    *siglen = 4096;
+    memset(sig, 0, COMPOSITE_SIG_SIZE);
+    *siglen = COMPOSITE_SIG_SIZE;
     
     return 1;
 }
@@ -171,6 +174,7 @@ static int composite_sig_set_ctx_params(void *ctx, const OSSL_PARAM params[])
 }
 
 /* Dispatch tables for each composite signature algorithm */
+/* Note: All algorithms currently use the same implementation functions */
 const OSSL_DISPATCH composite_mldsa44_rsa2048_signature_functions[] = {
     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
@@ -187,7 +191,6 @@ const OSSL_DISPATCH composite_mldsa44_rsa2048_signature_functions[] = {
     { 0, NULL }
 };
 
-/* Reuse the same functions for other algorithm variants */
 const OSSL_DISPATCH composite_mldsa44_ecdsa_p256_signature_functions[] = {
     { OSSL_FUNC_SIGNATURE_NEWCTX, (void (*)(void))composite_sig_newctx },
     { OSSL_FUNC_SIGNATURE_FREECTX, (void (*)(void))composite_sig_freectx },
