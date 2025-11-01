@@ -1,23 +1,9 @@
-#include "composite_provider.h"
-#include <openssl/core_names.h>
-#include <openssl/params.h>
-#include <string.h>
-#include <stdlib.h>
+#include "composite_kem.h"
 
-/* Placeholder KEM sizes (these would be calculated based on component algorithms) */
-#define COMPOSITE_KEM_CT_SIZE 2048  /* Placeholder: ML-KEM + ECDH ciphertext */
-#define COMPOSITE_KEM_SS_SIZE 64    /* Placeholder: combined shared secret */
+                    // ============================
+                    // Static function declarations
+                    // ============================
 
-/* KEM context structure */
-typedef struct composite_kem_ctx_st {
-    COMPOSITE_PROV_CTX *provctx;
-    const char *algorithm_name;
-    /* Key material would go here */
-    unsigned char *shared_secret;
-    size_t shared_secret_len;
-} COMPOSITE_KEM_CTX;
-
-/* KEM function implementations */
 static OSSL_FUNC_kem_newctx_fn composite_kem_newctx;
 static OSSL_FUNC_kem_freectx_fn composite_kem_freectx;
 static OSSL_FUNC_kem_encapsulate_init_fn composite_kem_encapsulate_init;
@@ -27,6 +13,10 @@ static OSSL_FUNC_kem_decapsulate_fn composite_kem_decapsulate;
 static OSSL_FUNC_kem_get_ctx_params_fn composite_kem_get_ctx_params;
 static OSSL_FUNC_kem_set_ctx_params_fn composite_kem_set_ctx_params;
 
+                    // ==================================
+                    // Signature function implementations
+                    // ==================================
+
 static void *composite_kem_newctx(void *provctx)
 {
     COMPOSITE_KEM_CTX *ctx = malloc(sizeof(COMPOSITE_KEM_CTX));
@@ -35,7 +25,7 @@ static void *composite_kem_newctx(void *provctx)
         return NULL;
 
     memset(ctx, 0, sizeof(COMPOSITE_KEM_CTX));
-    ctx->provctx = (COMPOSITE_PROV_CTX *)provctx;
+    ctx->provctx = (COMPOSITE_CTX *)provctx;
     
     return ctx;
 }
@@ -154,40 +144,46 @@ static int composite_kem_set_ctx_params(void *ctx, const OSSL_PARAM params[])
     return 1;
 }
 
-/* Dispatch tables for each composite KEM algorithm */
-/* Note: All algorithms currently use the same implementation functions */
-const OSSL_DISPATCH composite_mlkem512_ecdh_p256_kem_functions[] = {
-    { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-    { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-    { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-    { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-    { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-    { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-    { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-    { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-    { 0, NULL }
-};
+KEM_DISPATCH_TABLE(mlkem512, ecdh_p256)
 
-const OSSL_DISPATCH composite_mlkem768_ecdh_p384_kem_functions[] = {
-    { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-    { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-    { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-    { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-    { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-    { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-    { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-    { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-    { 0, NULL }
-};
+// /* Dispatch tables for each composite KEM algorithm */
+// /* Note: All algorithms currently use the same implementation functions */
+// const OSSL_DISPATCH composite_mlkem512_ecdh_p256_kem_functions[] = {
+//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
+//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
+//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
+//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
+//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
+//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
+//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
+//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
+//     { 0, NULL }
+// };
 
-const OSSL_DISPATCH composite_mlkem1024_ecdh_p521_kem_functions[] = {
-    { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-    { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-    { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-    { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-    { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-    { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-    { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-    { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-    { 0, NULL }
-};
+KEM_DISPATCH_TABLE(mlkem768, ecdh_p384)
+
+// const OSSL_DISPATCH composite_mlkem768_ecdh_p384_kem_functions[] = {
+//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
+//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
+//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
+//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
+//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
+//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
+//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
+//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
+//     { 0, NULL }
+// };
+
+KEM_DISPATCH_TABLE(mlkem1024, ecdh_p521)
+
+// const OSSL_DISPATCH composite_mlkem1024_ecdh_p521_kem_functions[] = {
+//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
+//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
+//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
+//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
+//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
+//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
+//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
+//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
+//     { 0, NULL }
+// };

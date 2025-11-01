@@ -1,5 +1,4 @@
-#include "composite_provider.h"
-#include <openssl/core_names.h>
+#include "mlkem_composite.h"
 
 /*
  * ML-KEM Composite Key Encapsulation Mechanisms

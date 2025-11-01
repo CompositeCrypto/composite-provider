@@ -1,8 +1,4 @@
-#include "composite_provider.h"
-#include <openssl/core_names.h>
-#include <openssl/err.h>
-#include <string.h>
-#include <stdlib.h>
+#include "provider.h"
 
 /* Provider initialization */
 static OSSL_FUNC_provider_gettable_params_fn composite_gettable_params;
@@ -65,7 +61,7 @@ const OSSL_ALGORITHM *composite_query_operation(void *provctx, int operation_id,
 
 static void composite_teardown(void *provctx)
 {
-    COMPOSITE_PROV_CTX *ctx = (COMPOSITE_PROV_CTX *)provctx;
+    COMPOSITE_CTX *ctx = (COMPOSITE_CTX *)provctx;
     
     if (ctx != NULL) {
         OSSL_LIB_CTX_free(ctx->libctx);
@@ -87,7 +83,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
                        const OSSL_DISPATCH **out,
                        void **provctx)
 {
-    COMPOSITE_PROV_CTX *ctx;
+    COMPOSITE_CTX *ctx;
     (void)in; /* Unused */
 
     ctx = malloc(sizeof(*ctx));
