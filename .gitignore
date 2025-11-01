@@ -53,3 +53,21 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# CMake build directory
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+install_manifest.txt
+
+# Test executables
+tests/test_provider
+
+# Example executables
+examples/load_provider
+
+# CodeQL artifacts
+_codeql_build_dir/
+_codeql_detected_source_root
