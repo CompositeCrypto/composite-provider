@@ -35,7 +35,7 @@
 /*
  * ML-DSA-87 Size Definitions (FIPS 204)
  */
-#define ML_DSA_87_PUB_KEY_SZ  2592
+#define ML_DSA_87_PUB_KEY_SZ  2420
 #define ML_DSA_87_PRIV_KEY_SZ 32
 #define ML_DSA_87_SIG_SZ      4627
 
