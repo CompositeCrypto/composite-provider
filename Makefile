@@ -12,7 +12,8 @@ SOURCES = src/provider.c \
           src/composite_kem.c \
 		  src/composite_key.c \
           src/mldsa_composite.c \
-          src/mlkem_composite.c
+          src/mlkem_composite.c \
+		  src/composite_keys.c
 
 # Object files
 OBJECTS = $(SOURCES:.c=.o)
