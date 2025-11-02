@@ -1,16 +1,26 @@
-#ifndef _PROVIDER_H
-#define _PROVIDER_H
+#ifndef _COMPOSITE_PROVIDER_H
+#define _COMPOSITE_PROVIDER_H
 
-#include <openssl/core_names.h>
-#include <openssl/err.h>
-#include <string.h>
-#include <stdlib.h>
-
-typedef struct composite_prov_ctx_st {
-    const OSSL_CORE_HANDLE *core_handle;
-    OSSL_LIB_CTX *libctx;
-} COMPOSITE_CTX;
+#include "compat.h"
 
 #include "composite_provider.h"
+#include "provider_ctx.h"
 
-#endif /* _PROVIDER_H */
+BEGIN_C_DECLS
+
+/*! \brief Initialize a provider.
+ *
+ * \param core The core handle to use.
+ * \param in The input dispatch table.
+ * \param out The output dispatch table.
+ * \param provctx The provider context.
+ * \return 1 on success, 0 on error.
+ */
+int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
+                       const OSSL_DISPATCH *in,
+                       const OSSL_DISPATCH **out,
+                       void **provctx);
+
+END_C_DECLS
+
+#endif /* _COMPOSITE_PROVIDER_H */
