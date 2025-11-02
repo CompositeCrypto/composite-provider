@@ -2,13 +2,15 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -fPIC -std=c99 -O2
 LDFLAGS = -shared
-INCLUDES = -I./include -I/usr/include/openssl
+INCLUDES = $(EXTRA_INCLUDE) -I./include -I/usr/include/openssl
+PREFIX = /opt/crypto
 LIBS = -lcrypto
 
 # Source files
 SOURCES = src/provider.c \
           src/composite_sig.c \
           src/composite_kem.c \
+		  src/composite_key.c \
           src/mldsa_composite.c \
           src/mlkem_composite.c
 
@@ -36,8 +38,8 @@ test: $(TARGET)
 	$(MAKE) -C tests
 
 install: $(TARGET)
-	install -d $(DESTDIR)/usr/lib/ossl-modules
-	install -m 755 $(TARGET) $(DESTDIR)/usr/lib/ossl-modules/
+	install -d $(DESTDIR)$(PREFIX)/lib/ossl-modules
+	install -m 755 $(TARGET) $(DESTDIR)$(PREFIX)/lib/ossl-modules/
 
 .PHONY: help
 help:

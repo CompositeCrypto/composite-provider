@@ -7,6 +7,7 @@
 const OSSL_ALGORITHM *composite_signature_algorithms(void *provctx)
 {
     (void)provctx; /* Unused */
+    
     static const OSSL_ALGORITHM algorithms[] = {
         { COMPOSITE_MLDSA44_RSA2048_PSS_NAME, "provider=composite",
           composite_mldsa44_rsa2048_signature_functions, 

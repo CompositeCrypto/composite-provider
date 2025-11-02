@@ -1,5 +1,5 @@
-#ifndef HEADER_COMPOSITE_SIG_H
-#define HEADER_COMPOSITE_SIG_H
+#ifndef HEADER_COMPOSITE_SIG_FN_H
+#define HEADER_COMPOSITE_SIG_FN_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -45,4 +45,15 @@ typedef struct composite_sig_ctx_st {
         {0, NULL} \
     }
 
-#endif /* HEADER_COMPOSITE_SIG_H */
+                    // ====================
+                    // Signature operations
+                    // ====================
+
+DECLARE_SIG_DISPATCH_TABLE(mldsa44, rsa2048)
+DECLARE_SIG_DISPATCH_TABLE(mldsa44, ecdsa_p256)
+DECLARE_SIG_DISPATCH_TABLE(mldsa65, rsa3072)
+DECLARE_SIG_DISPATCH_TABLE(mldsa65, ecdsa_p384)
+DECLARE_SIG_DISPATCH_TABLE(mldsa87, rsa4096)
+DECLARE_SIG_DISPATCH_TABLE(mldsa87, ecdsa_p521)
+
+#endif /* HEADER_COMPOSITE_SIG_FN_H */
