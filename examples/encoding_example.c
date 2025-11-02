@@ -147,11 +147,14 @@ void example_kem_ct_encoding(void)
     unsigned char pq_ct[] = "ML-KEM-512-CIPHERTEXT";
     unsigned char trad_ct[] = "ECDH-P256-CIPHERTEXT";
     
-    /* Encode */
+    /* Encode - Step 1: Get required size */
     size_t encoded_len = 0;
-    composite_kem_ct_encode(pq_ct, sizeof(pq_ct) - 1,
-                            trad_ct, sizeof(trad_ct) - 1,
-                            NULL, &encoded_len);
+    if (!composite_kem_ct_encode(pq_ct, sizeof(pq_ct) - 1,
+                                 trad_ct, sizeof(trad_ct) - 1,
+                                 NULL, &encoded_len)) {
+        printf("Error: Failed to get encoding size\n");
+        return;
+    }
     
     unsigned char *encoded = malloc(encoded_len);
     if (!encoded) {
@@ -159,18 +162,27 @@ void example_kem_ct_encoding(void)
         return;
     }
     
-    composite_kem_ct_encode(pq_ct, sizeof(pq_ct) - 1,
-                            trad_ct, sizeof(trad_ct) - 1,
-                            encoded, &encoded_len);
+    /* Step 2: Encode */
+    if (!composite_kem_ct_encode(pq_ct, sizeof(pq_ct) - 1,
+                                 trad_ct, sizeof(trad_ct) - 1,
+                                 encoded, &encoded_len)) {
+        printf("Error: Encoding failed\n");
+        free(encoded);
+        return;
+    }
     printf("Encoded composite KEM ciphertext: %zu bytes\n", encoded_len);
     
     /* Decode */
     unsigned char *decoded_pq = NULL, *decoded_trad = NULL;
     size_t decoded_pq_len = 0, decoded_trad_len = 0;
     
-    composite_kem_ct_decode(encoded, encoded_len,
-                            &decoded_pq, &decoded_pq_len,
-                            &decoded_trad, &decoded_trad_len);
+    if (!composite_kem_ct_decode(encoded, encoded_len,
+                                 &decoded_pq, &decoded_pq_len,
+                                 &decoded_trad, &decoded_trad_len)) {
+        printf("Error: Decoding failed\n");
+        free(encoded);
+        return;
+    }
     
     printf("Decoded:\n");
     printf("  PQ ciphertext: %zu bytes\n", decoded_pq_len);

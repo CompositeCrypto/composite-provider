@@ -35,9 +35,9 @@ int composite_key_encode(const unsigned char *pq_key, size_t pq_key_len,
  * 
  * @param in Input buffer containing encoded key
  * @param in_len Length of the input buffer
- * @param pq_key Output buffer for post-quantum key (allocated by caller)
+ * @param pq_key Output buffer for post-quantum key (allocated by this function)
  * @param pq_key_len Pointer to store the post-quantum key length
- * @param trad_key Output buffer for traditional key (allocated by caller)
+ * @param trad_key Output buffer for traditional key (allocated by this function)
  * @param trad_key_len Pointer to store the traditional key length
  * @return 1 on success, 0 on failure
  */
