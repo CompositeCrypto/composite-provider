@@ -54,16 +54,17 @@
 #define ML_KEM_1024_CT_SZ       1568
 
 /*
- * Encode a composite key using length-prefixed format.
- * Format: [4-byte pq_key_len][pq_key][4-byte trad_key_len][trad_key]
+ * Encode a composite key using raw concatenation.
+ * Format: [pq_key][trad_key]
  *
- * The pq_key length is validated against the expected size for the given pq_alg.
+ * The pq_key length must exactly match the expected size for the given pq_alg.
  * For public keys, pq_key_len must match ML_DSA_*_PUB_KEY_SZ.
  * For private keys, pq_key_len must match ML_DSA_*_PRIV_KEY_SZ.
+ * No length prefixes are used.
  *
  * @param pq_alg Algorithm identifier (ML_DSA_44, ML_DSA_65, or ML_DSA_87)
  * @param pq_key Pointer to PQ key data
- * @param pq_key_len Length of PQ key
+ * @param pq_key_len Length of PQ key (must match expected size)
  * @param trad_key Pointer to traditional key data
  * @param trad_key_len Length of traditional key
  * @param out Output buffer (NULL to query required size)
@@ -75,9 +76,10 @@ int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_
                          unsigned char *out, size_t *out_len);
 
 /*
- * Decode a composite key from length-prefixed format.
+ * Decode a composite key from raw concatenation format.
  *
- * The pq_key length is validated against the expected size for the given pq_alg.
+ * The pq_key is extracted based on the expected size for the given pq_alg.
+ * The traditional key is the remaining data.
  * Memory is allocated for pq_key and trad_key; caller must free them.
  *
  * @param pq_alg Algorithm identifier (ML_DSA_44, ML_DSA_65, or ML_DSA_87)

@@ -64,25 +64,6 @@ static size_t get_ml_kem_ct_size(int pq_alg) {
     }
 }
 
-/*
- * Helper function to write a 32-bit length in big-endian format
- */
-static void write_length(unsigned char *buf, size_t len) {
-    buf[0] = (unsigned char)((len >> 24) & 0xFF);
-    buf[1] = (unsigned char)((len >> 16) & 0xFF);
-    buf[2] = (unsigned char)((len >> 8) & 0xFF);
-    buf[3] = (unsigned char)(len & 0xFF);
-}
-
-/*
- * Helper function to read a 32-bit length in big-endian format
- */
-static size_t read_length(const unsigned char *buf) {
-    return ((size_t)buf[0] << 24) |
-           ((size_t)buf[1] << 16) |
-           ((size_t)buf[2] << 8) |
-           ((size_t)buf[3]);
-}
 
 int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_len,
                          const unsigned char *trad_key, size_t trad_key_len,
@@ -113,8 +94,8 @@ int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_
         return 0;
     }
     
-    /* Calculate required size: 4 bytes + pq_key + 4 bytes + trad_key */
-    required_size = 4 + pq_key_len + 4 + trad_key_len;
+    /* Calculate required size: raw concatenation */
+    required_size = pq_key_len + trad_key_len;
     
     /* Query mode: return required size */
     if (out == NULL) {
@@ -127,11 +108,9 @@ int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_
         return 0;
     }
     
-    /* Encode: [4B pq_len][pq_key][4B trad_len][trad_key] */
-    write_length(out, pq_key_len);
-    memcpy(out + 4, pq_key, pq_key_len);
-    write_length(out + 4 + pq_key_len, trad_key_len);
-    memcpy(out + 4 + pq_key_len + 4, trad_key, trad_key_len);
+    /* Encode: [pq_key][trad_key] */
+    memcpy(out, pq_key, pq_key_len);
+    memcpy(out + pq_key_len, trad_key, trad_key_len);
     
     *out_len = required_size;
     return 1;
@@ -140,20 +119,14 @@ int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_
 int composite_key_decode(int pq_alg, const unsigned char *in, size_t in_len,
                          unsigned char **pq_key, size_t *pq_key_len,
                          unsigned char **trad_key, size_t *trad_key_len) {
-    size_t pq_len, trad_len;
     size_t expected_pq_pub_size, expected_pq_priv_size;
-    size_t offset;
+    size_t pq_len, trad_len;
     unsigned char *pq_buf = NULL;
     unsigned char *trad_buf = NULL;
     
     /* Validate inputs */
     if (in == NULL || pq_key == NULL || pq_key_len == NULL ||
         trad_key == NULL || trad_key_len == NULL) {
-        return 0;
-    }
-    
-    /* Need at least 8 bytes for the two length fields */
-    if (in_len < 8) {
         return 0;
     }
     
@@ -166,29 +139,24 @@ int composite_key_decode(int pq_alg, const unsigned char *in, size_t in_len,
         return 0;
     }
     
-    /* Read PQ key length */
-    pq_len = read_length(in);
-    
-    /* Validate PQ key length against expected sizes */
-    if (pq_len != expected_pq_pub_size && pq_len != expected_pq_priv_size) {
+    /* Try to determine which key type we have based on input length.
+     * We prioritize public key size as it's more common. */
+    if (in_len >= expected_pq_pub_size + 1) {
+        /* Likely a public key (has enough data) */
+        pq_len = expected_pq_pub_size;
+    } else if (in_len >= expected_pq_priv_size + 1) {
+        /* Likely a private key */
+        pq_len = expected_pq_priv_size;
+    } else {
+        /* Not enough data for either key type */
         return 0;
     }
     
-    /* Check if we have enough data for PQ key */
-    if (in_len < 4 + pq_len + 4) {
-        return 0;
-    }
+    /* Calculate traditional key length */
+    trad_len = in_len - pq_len;
     
-    /* Read traditional key length */
-    trad_len = read_length(in + 4 + pq_len);
-    
-    /* Validate traditional key length */
+    /* Traditional key must have positive length */
     if (trad_len == 0) {
-        return 0;
-    }
-    
-    /* Check if we have enough data for the complete encoding */
-    if (in_len < 4 + pq_len + 4 + trad_len) {
         return 0;
     }
     
@@ -206,10 +174,8 @@ int composite_key_decode(int pq_alg, const unsigned char *in, size_t in_len,
     }
     
     /* Copy key data */
-    offset = 4;
-    memcpy(pq_buf, in + offset, pq_len);
-    offset += pq_len + 4;
-    memcpy(trad_buf, in + offset, trad_len);
+    memcpy(pq_buf, in, pq_len);
+    memcpy(trad_buf, in + pq_len, trad_len);
     
     /* Set output parameters */
     *pq_key = pq_buf;
