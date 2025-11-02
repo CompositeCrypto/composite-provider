@@ -20,6 +20,9 @@
 
 /*
  * ML-DSA-44 Size Definitions (FIPS 204)
+ * Note: PRIV_KEY_SZ represents the seed size (ξ), not the full expanded private key.
+ * Full private key would be 2560 bytes. This matches common usage where only the
+ * seed is stored and the full key is expanded when needed.
  */
 #define ML_DSA_44_PUB_KEY_SZ  1312
 #define ML_DSA_44_PRIV_KEY_SZ 32
@@ -27,6 +30,8 @@
 
 /*
  * ML-DSA-65 Size Definitions (FIPS 204)
+ * Note: PRIV_KEY_SZ represents the seed size (ξ), not the full expanded private key.
+ * Full private key would be 4032 bytes.
  */
 #define ML_DSA_65_PUB_KEY_SZ  1952
 #define ML_DSA_65_PRIV_KEY_SZ 32
@@ -34,6 +39,8 @@
 
 /*
  * ML-DSA-87 Size Definitions (FIPS 204)
+ * Note: PRIV_KEY_SZ represents the seed size (ξ), not the full expanded private key.
+ * Full private key would be 4896 bytes.
  */
 #define ML_DSA_87_PUB_KEY_SZ  2420
 #define ML_DSA_87_PRIV_KEY_SZ 32
@@ -41,6 +48,8 @@
 
 /*
  * ML-KEM-768 Size Definitions (FIPS 203)
+ * Note: PRIV_KEY_SZ represents a compact representation (seed or hash), not the full
+ * expanded private key. Full private key would be 2400 bytes.
  */
 #define ML_KEM_768_PUB_KEY_SZ  1184
 #define ML_KEM_768_PRIV_KEY_SZ 64
@@ -48,6 +57,8 @@
 
 /*
  * ML-KEM-1024 Size Definitions (FIPS 203)
+ * Note: PRIV_KEY_SZ represents a compact representation (seed or hash), not the full
+ * expanded private key. Full private key would be 3168 bytes.
  */
 #define ML_KEM_1024_PUB_KEY_SZ  1568
 #define ML_KEM_1024_PRIV_KEY_SZ 64

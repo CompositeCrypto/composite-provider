@@ -360,6 +360,10 @@ static int test_all_ml_dsa_variants(void) {
         int ret;
         
         if (!pq_key || !trad_key || !pq_sig || !trad_sig) {
+            free(pq_key);
+            free(trad_key);
+            free(pq_sig);
+            free(trad_sig);
             TEST_FAIL("Memory allocation failed");
         }
         
@@ -406,6 +410,8 @@ static int test_all_ml_kem_variants(void) {
         int ret;
         
         if (!pq_ct || !trad_ct) {
+            free(pq_ct);
+            free(trad_ct);
             TEST_FAIL("Memory allocation failed");
         }
         
