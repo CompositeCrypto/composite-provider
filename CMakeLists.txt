@@ -18,6 +18,8 @@ set(PROVIDER_SOURCES
     src/provider.c
     src/composite_sig.c
     src/composite_kem.c
+    src/composite_key.c
+    src/composite_encoding.c
     src/mldsa_composite.c
     src/mlkem_composite.c
 )

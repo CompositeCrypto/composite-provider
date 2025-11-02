@@ -1,20 +1,27 @@
 # Test Makefile
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -I../include
+CFLAGS = -Wall -Wextra -std=c99 -I../include -I../src
 LDFLAGS = -lcrypto
 
-TEST_SOURCES = test_provider.c
-TEST_TARGET = test_provider
+# Provider object files (need these for encoding tests)
+PROVIDER_OBJS = ../src/composite_encoding.o
+
+TEST_SOURCES = test_provider.c test_encoding.c
+TEST_TARGETS = test_provider test_encoding
 
 .PHONY: all clean test
 
-all: $(TEST_TARGET)
+all: $(TEST_TARGETS)
 
-$(TEST_TARGET): $(TEST_SOURCES)
+test_provider: test_provider.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: $(TEST_TARGET)
-	./$(TEST_TARGET)
+test_encoding: test_encoding.c $(PROVIDER_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+test: $(TEST_TARGETS)
+	./test_provider
+	./test_encoding
 
 clean:
-	rm -f $(TEST_TARGET)
+	rm -f $(TEST_TARGETS)
