@@ -8,12 +8,15 @@ LIBS = -lcrypto
 
 # Source files
 SOURCES = src/provider.c \
+		  src/provider_ctx.c \
           src/composite_sig.c \
+		  src/composite_sig_key.c \
+		  src/composite_sig_encoding.c \
           src/composite_kem.c \
-		  src/composite_key.c \
+		  src/composite_kem_key.c \
+		  src/composite_kem_encoding.c \
           src/mldsa_composite.c \
-          src/mlkem_composite.c \
-		  src/composite_keys.c
+          src/mlkem_composite.c
 
 # Object files
 OBJECTS = $(SOURCES:.c=.o)

@@ -1,11 +1,8 @@
 #include "composite_provider.h"
 #include <openssl/core_names.h>
 #include <openssl/params.h>
-#include <crypto/ml_dsa.h>
 #include <string.h>
 #include <stdlib.h>
-
-
 
 /* Key context structure */
 typedef struct composite_key_st {

@@ -12,7 +12,7 @@ all: $(EXAMPLES)
 load_provider: load_provider.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-encoding_example: encoding_example.c ../src/composite_encoding.c
+encoding_example: encoding_example.c ../src/composite_sig_key.c ../src/composite_sig_encoding.c ../src/composite_kem_key.c ../src/composite_kem_encoding.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
