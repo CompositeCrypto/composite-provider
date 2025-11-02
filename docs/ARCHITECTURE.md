@@ -177,12 +177,60 @@ The architecture supports:
 - Memory usage scales with sum of component sizes
 - Processing time is sum of component times
 
+## Encoding/Decoding Support
+
+### Composite Encoding Module (`composite_encoding.c`)
+
+The provider now includes comprehensive encoding and decoding functions for composite cryptographic structures:
+
+#### Composite Key Encoding
+Keys (both signature and KEM) use a simple length-prefixed binary format:
+```
+[PQ_key_length (4 bytes)][PQ_key_data][Trad_key_length (4 bytes)][Trad_key_data]
+```
+- Length values are stored in big-endian format
+- Supports both encoding and decoding operations
+- Query mode available to determine required buffer size
+
+#### Composite Signature Encoding (ASN.1)
+Signatures use ASN.1 DER encoding for interoperability:
+```asn1
+CompositeSignature ::= SEQUENCE {
+    pqSignature          OCTET STRING,
+    traditionalSignature OCTET STRING
+}
+```
+- Full ASN.1 support using OpenSSL's ASN.1 templates
+- DER encoding for compact representation
+- Standards-compliant format
+
+#### Composite KEM Ciphertext Encoding
+KEM ciphertexts use length-prefixed binary format:
+```
+[PQ_ct_length (4 bytes)][PQ_ciphertext][Trad_ct_length (4 bytes)][Trad_ciphertext]
+```
+- Similar format to key encoding for consistency
+- Length values in big-endian format
+- Efficient for binary protocols
+
+### API Functions
+
+All encoding functions support:
+- Query mode: Pass NULL output buffer to get required size
+- Error handling: Return 0 on failure, 1 on success
+- Memory management: Decoding functions allocate memory for outputs
+
+Available functions:
+- `composite_key_encode()` / `composite_key_decode()`
+- `composite_sig_encode()` / `composite_sig_decode()`
+- `composite_kem_ct_encode()` / `composite_kem_ct_decode()`
+
 ## Future Enhancements
 
 Planned improvements:
 1. Full cryptographic implementation (currently placeholders)
 2. Key generation support
 3. Key import/export
-4. ASN.1 encoding/decoding
+4. ~~ASN.1 encoding/decoding~~ ✓ Completed
 5. Performance optimizations
 6. Hardware acceleration support
