@@ -64,9 +64,11 @@ install_manifest.txt
 
 # Test executables
 tests/test_provider
+tests/test_encoding
 
 # Example executables
 examples/load_provider
+examples/encoding_example
 
 # CodeQL artifacts
 _codeql_build_dir/
