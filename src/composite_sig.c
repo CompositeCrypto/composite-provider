@@ -88,6 +88,7 @@ static int composite_sig_sign(void *ctx, unsigned char *sig, size_t *siglen,
     
     if (sig == NULL) {
         /* Return required signature size */
+
         *siglen = COMPOSITE_SIG_SIZE;
         return 1;
     }
