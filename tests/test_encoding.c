@@ -25,9 +25,9 @@ static int test_passed = 0;
         return 0; \
     } while(0)
 
-/* Test key encoding/decoding with ML-DSA-44 public key */
+/* Test public key encoding/decoding with ML-DSA-44 public key */
 static int test_key_encode_decode_ml_dsa_44_pub(void) {
-    TEST_START("Key encode/decode with ML-DSA-44 public key");
+    TEST_START("Public key encode/decode with ML-DSA-44 public key");
     
     unsigned char *pq_key = NULL;
     unsigned char *trad_key = NULL;
@@ -51,8 +51,8 @@ static int test_key_encode_decode_ml_dsa_44_pub(void) {
     memset(trad_key, 0x5A, trad_len);
     
     /* Query size */
-    ret = composite_key_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
-                              NULL, &encoded_len);
+    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+                                  NULL, &encoded_len);
     if (!ret) {
         TEST_FAIL("Query size failed");
     }
@@ -63,16 +63,16 @@ static int test_key_encode_decode_ml_dsa_44_pub(void) {
         TEST_FAIL("Memory allocation failed");
     }
     
-    ret = composite_key_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
-                              encoded, &encoded_len);
+    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+                                  encoded, &encoded_len);
     if (!ret) {
         TEST_FAIL("Encoding failed");
     }
     
     /* Decode */
-    ret = composite_key_decode(ML_DSA_44, encoded, encoded_len,
-                              &decoded_pq, &decoded_pq_len,
-                              &decoded_trad, &decoded_trad_len);
+    ret = composite_pubkey_decode(ML_DSA_44, encoded, encoded_len,
+                                  &decoded_pq, &decoded_pq_len,
+                                  &decoded_trad, &decoded_trad_len);
     if (!ret) {
         TEST_FAIL("Decoding failed");
     }
@@ -101,9 +101,9 @@ static int test_key_encode_decode_ml_dsa_44_pub(void) {
     return 1;
 }
 
-/* Test key encoding with invalid PQ key size */
+/* Test public key encoding with invalid PQ key size */
 static int test_key_encode_invalid_pq_size(void) {
-    TEST_START("Key encode with invalid PQ key size");
+    TEST_START("Public key encode with invalid PQ key size");
     
     unsigned char pq_key[100];
     unsigned char trad_key[100];
@@ -111,8 +111,8 @@ static int test_key_encode_invalid_pq_size(void) {
     int ret;
     
     /* Try encoding with wrong PQ key size */
-    ret = composite_key_encode(ML_DSA_44, pq_key, 100, trad_key, 100,
-                              NULL, &encoded_len);
+    ret = composite_pubkey_encode(ML_DSA_44, pq_key, 100, trad_key, 100,
+                                  NULL, &encoded_len);
     if (ret) {
         TEST_FAIL("Should have failed with invalid PQ key size");
     }
@@ -372,11 +372,11 @@ static int test_all_ml_dsa_variants(void) {
         memset(pq_sig, 0xCC, sig_sizes[i]);
         memset(trad_sig, 0xDD, 100);
         
-        /* Test key encoding */
-        ret = composite_key_encode(variants[i], pq_key, pub_sizes[i], trad_key, 100,
-                                  NULL, &encoded_len);
+        /* Test public key encoding */
+        ret = composite_pubkey_encode(variants[i], pq_key, pub_sizes[i], trad_key, 100,
+                                      NULL, &encoded_len);
         if (!ret) {
-            TEST_FAIL("Key encoding query failed");
+            TEST_FAIL("Public key encoding query failed");
         }
         
         /* Test signature encoding */

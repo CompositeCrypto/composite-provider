@@ -40,7 +40,7 @@ int main(void) {
     /* ========================================
      * Example 1: Key Encoding/Decoding
      * ======================================== */
-    printf("--- Example 1: Key Encoding/Decoding ---\n");
+    printf("--- Example 1: Public Key Encoding/Decoding ---\n");
     
     /* Allocate and initialize test key data for ML-DSA-44 */
     pq_len = ML_DSA_44_PUB_KEY_SZ;
@@ -62,8 +62,8 @@ int main(void) {
     print_hex("Traditional Key", trad_key, trad_len);
     
     /* Query required encoding size */
-    ret = composite_key_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
-                              NULL, &encoded_len);
+    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+                                  NULL, &encoded_len);
     if (!ret) {
         fprintf(stderr, "Failed to query encoding size\n");
         goto cleanup;
@@ -78,8 +78,8 @@ int main(void) {
         goto cleanup;
     }
     
-    ret = composite_key_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
-                              encoded, &encoded_len);
+    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+                                  encoded, &encoded_len);
     if (!ret) {
         fprintf(stderr, "Key encoding failed\n");
         goto cleanup;
@@ -87,10 +87,10 @@ int main(void) {
     
     print_hex("Encoded Key", encoded, encoded_len);
     
-    /* Decode the key */
-    ret = composite_key_decode(ML_DSA_44, encoded, encoded_len,
-                              &decoded_pq, &decoded_pq_len,
-                              &decoded_trad, &decoded_trad_len);
+    /* Decode the public key */
+    ret = composite_pubkey_decode(ML_DSA_44, encoded, encoded_len,
+                                  &decoded_pq, &decoded_pq_len,
+                                  &decoded_trad, &decoded_trad_len);
     if (!ret) {
         fprintf(stderr, "Key decoding failed\n");
         goto cleanup;
@@ -102,9 +102,9 @@ int main(void) {
     /* Verify decoded data matches original */
     if (decoded_pq_len == pq_len && memcmp(pq_key, decoded_pq, pq_len) == 0 &&
         decoded_trad_len == trad_len && memcmp(trad_key, decoded_trad, trad_len) == 0) {
-        printf("✓ Key encoding/decoding successful!\n\n");
+        printf("✓ Public key encoding/decoding successful!\n\n");
     } else {
-        fprintf(stderr, "✗ Key verification failed\n\n");
+        fprintf(stderr, "✗ Public key verification failed\n\n");
         goto cleanup;
     }
     

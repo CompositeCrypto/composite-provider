@@ -5,7 +5,6 @@
 
 /*
  * Algorithm Identifiers for ML-DSA (FIPS 204)
- * These identifiers are used to specify which ML-DSA variant is being used
  */
 #define ML_DSA_44  1
 #define ML_DSA_65  2
@@ -13,7 +12,6 @@
 
 /*
  * Algorithm Identifiers for ML-KEM (FIPS 203)
- * These identifiers are used to specify which ML-KEM variant is being used
  */
 #define ML_KEM_768  4
 #define ML_KEM_1024 5
@@ -65,46 +63,56 @@
 #define ML_KEM_1024_CT_SZ       1568
 
 /*
- * Encode a composite key using raw concatenation.
- * Format: [pq_key][trad_key]
+ * Encode a composite public key using raw concatenation.
+ * Format: [ml-dsa public key][traditional public key]
  *
- * The pq_key length must exactly match the expected size for the given pq_alg.
- * For public keys, pq_key_len must match ML_DSA_*_PUB_KEY_SZ.
- * For private keys, pq_key_len must match ML_DSA_*_PRIV_KEY_SZ.
+ * pq_pub_len must match ML_DSA_*_PUB_KEY_SZ inferred from pq_alg.
  * No length prefixes are used.
  *
- * @param pq_alg Algorithm identifier (ML_DSA_44, ML_DSA_65, or ML_DSA_87)
- * @param pq_key Pointer to PQ key data
- * @param pq_key_len Length of PQ key (must match expected size)
- * @param trad_key Pointer to traditional key data
- * @param trad_key_len Length of traditional key
- * @param out Output buffer (NULL to query required size)
- * @param out_len Input: buffer size, Output: required/written size
  * @return 1 on success, 0 on failure
  */
-int composite_key_encode(int pq_alg, const unsigned char *pq_key, size_t pq_key_len,
-                         const unsigned char *trad_key, size_t trad_key_len,
-                         unsigned char *out, size_t *out_len);
+int composite_pubkey_encode(int pq_alg,
+                            const unsigned char *pq_pub, size_t pq_pub_len,
+                            const unsigned char *trad_pub, size_t trad_pub_len,
+                            unsigned char *out, size_t *out_len);
 
 /*
- * Decode a composite key from raw concatenation format.
+ * Decode a composite public key from raw concatenation.
+ * Splits by ML-DSA public key size inferred from pq_alg.
+ * Allocates buffers for outputs; caller must free.
  *
- * The pq_key is extracted based on the expected size for the given pq_alg.
- * The traditional key is the remaining data.
- * Memory is allocated for pq_key and trad_key; caller must free them.
- *
- * @param pq_alg Algorithm identifier (ML_DSA_44, ML_DSA_65, or ML_DSA_87)
- * @param in Input buffer containing encoded key
- * @param in_len Length of input buffer
- * @param pq_key Output: pointer to allocated PQ key data
- * @param pq_key_len Output: length of PQ key
- * @param trad_key Output: pointer to allocated traditional key data
- * @param trad_key_len Output: length of traditional key
  * @return 1 on success, 0 on failure
  */
-int composite_key_decode(int pq_alg, const unsigned char *in, size_t in_len,
-                         unsigned char **pq_key, size_t *pq_key_len,
-                         unsigned char **trad_key, size_t *trad_key_len);
+int composite_pubkey_decode(int pq_alg,
+                            const unsigned char *in, size_t in_len,
+                            unsigned char **pq_pub, size_t *pq_pub_len,
+                            unsigned char **trad_pub, size_t *trad_pub_len);
+
+/*
+ * Encode a composite private key using raw concatenation.
+ * Format: [ml-dsa private seed][traditional private key]
+ *
+ * pq_seed_len must match ML_DSA_*_PRIV_KEY_SZ inferred from pq_alg.
+ * No length prefixes are used.
+ *
+ * @return 1 on success, 0 on failure
+ */
+int composite_privkey_encode(int pq_alg,
+                             const unsigned char *pq_seed, size_t pq_seed_len,
+                             const unsigned char *trad_priv, size_t trad_priv_len,
+                             unsigned char *out, size_t *out_len);
+
+/*
+ * Decode a composite private key from raw concatenation.
+ * Splits by ML-DSA private seed size inferred from pq_alg.
+ * Allocates buffers for outputs; caller must free.
+ *
+ * @return 1 on success, 0 on failure
+ */
+int composite_privkey_decode(int pq_alg,
+                             const unsigned char *in, size_t in_len,
+                             unsigned char **pq_seed, size_t *pq_seed_len,
+                             unsigned char **trad_priv, size_t *trad_priv_len);
 
 /*
  * Encode a composite signature using raw concatenation.
