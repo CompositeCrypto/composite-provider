@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../src/composite_encoding.h"
+
+#include "../src/composite_sig_key.h"
+#include "../src/composite_sig_encoding.h"
+#include "../src/composite_kem_key.h"
+#include "../src/composite_kem_encoding.h"
 
 /* Helper function to print hex data */
 static void print_hex(const char *label, const unsigned char *data, size_t len) {
@@ -62,7 +66,7 @@ int main(void) {
     print_hex("Traditional Key", trad_key, trad_len);
     
     /* Query required encoding size */
-    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+    ret = composite_sig_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
                                   NULL, &encoded_len);
     if (!ret) {
         fprintf(stderr, "Failed to query encoding size\n");
@@ -78,8 +82,8 @@ int main(void) {
         goto cleanup;
     }
     
-    ret = composite_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
-                                  encoded, &encoded_len);
+    ret = composite_sig_pubkey_encode(ML_DSA_44, pq_key, pq_len, trad_key, trad_len,
+                                      encoded, &encoded_len);
     if (!ret) {
         fprintf(stderr, "Key encoding failed\n");
         goto cleanup;
@@ -88,9 +92,9 @@ int main(void) {
     print_hex("Encoded Key", encoded, encoded_len);
     
     /* Decode the public key */
-    ret = composite_pubkey_decode(ML_DSA_44, encoded, encoded_len,
-                                  &decoded_pq, &decoded_pq_len,
-                                  &decoded_trad, &decoded_trad_len);
+    ret = composite_sig_pubkey_decode(ML_DSA_44, encoded, encoded_len,
+                                      &decoded_pq, &decoded_pq_len,
+                                      &decoded_trad, &decoded_trad_len);
     if (!ret) {
         fprintf(stderr, "Key decoding failed\n");
         goto cleanup;

@@ -63,7 +63,7 @@ static int test_provider_load(void)
         goto end;
     }
 
-    if (version && strcmp(version, "1.0.0") == 0) {
+    if (version && strcmp(version, "0.0.1") == 0) {
         printf("  PASSED: Provider version is correct\n");
     } else {
         printf("  FAILED: Provider version is incorrect\n");

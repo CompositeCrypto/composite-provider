@@ -20,6 +20,7 @@ set(PROVIDER_SOURCES
     src/composite_kem.c
     src/mldsa_composite.c
     src/mlkem_composite.c
+    src/composite_keys.c
 )
 
 # Build shared library
