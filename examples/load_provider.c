@@ -56,19 +56,19 @@ int main(void)
         printf("  Status:    %s\n\n", status ? "active" : "inactive");
     }
 
-    /* Display available algorithms */
-    printf("Available ML-DSA Composite Signature Algorithms:\n");
-    printf("  1. ML-DSA-44-RSA2048      - ML-DSA-44 with RSA-2048\n");
-    printf("  2. ML-DSA-44-ECDSA-P256   - ML-DSA-44 with ECDSA P-256\n");
-    printf("  3. ML-DSA-65-RSA3072      - ML-DSA-65 with RSA-3072\n");
-    printf("  4. ML-DSA-65-ECDSA-P384   - ML-DSA-65 with ECDSA P-384\n");
-    printf("  5. ML-DSA-87-RSA4096      - ML-DSA-87 with RSA-4096\n");
-    printf("  6. ML-DSA-87-ECDSA-P521   - ML-DSA-87 with ECDSA P-521\n\n");
+    // /* Display available algorithms */
+    // printf("Available ML-DSA Composite Signature Algorithms:\n");
+    // printf("  1. ML-DSA-44-RSA2048      - ML-DSA-44 with RSA-2048\n");
+    // printf("  2. ML-DSA-44-ECDSA-P256   - ML-DSA-44 with ECDSA P-256\n");
+    // printf("  3. ML-DSA-65-RSA3072      - ML-DSA-65 with RSA-3072\n");
+    // printf("  4. ML-DSA-65-ECDSA-P384   - ML-DSA-65 with ECDSA P-384\n");
+    // printf("  5. ML-DSA-87-RSA4096      - ML-DSA-87 with RSA-4096\n");
+    // printf("  6. ML-DSA-87-ECDSA-P521   - ML-DSA-87 with ECDSA P-521\n\n");
 
-    printf("Available ML-KEM Composite KEM Algorithms:\n");
-    printf("  1. ML-KEM-512-ECDH-P256   - ML-KEM-512 with ECDH P-256\n");
-    printf("  2. ML-KEM-768-ECDH-P384   - ML-KEM-768 with ECDH P-384\n");
-    printf("  3. ML-KEM-1024-ECDH-P521  - ML-KEM-1024 with ECDH P-521\n\n");
+    // printf("Available ML-KEM Composite KEM Algorithms:\n");
+    // printf("  1. ML-KEM-512-ECDH-P256   - ML-KEM-512 with ECDH P-256\n");
+    // printf("  2. ML-KEM-768-ECDH-P384   - ML-KEM-768 with ECDH P-384\n");
+    // printf("  3. ML-KEM-1024-ECDH-P521  - ML-KEM-1024 with ECDH P-521\n\n");
 
     printf("Usage Notes:\n");
     printf("  - Composite algorithms provide hybrid security\n");
