@@ -1,6 +1,6 @@
 # Makefile for Examples
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -I../src
+CFLAGS = -Wall -Wextra -std=c99 -I../src -I../include
 LDFLAGS = -lcrypto
 
 EXAMPLES = load_provider encoding_example

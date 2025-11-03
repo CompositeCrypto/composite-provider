@@ -3,8 +3,13 @@
 
 #include "compat.h"
 #include "provider_ctx.h"
+#include "composite_provider.h"
+
+#include <string.h>
 
 #include <openssl/evp.h>
+#include <openssl/ec.h>
+#include <openssl/rsa.h>
 
 BEGIN_C_DECLS
 
@@ -125,9 +130,9 @@ COMPOSITE_KEY * composite_signkey_new(void);
  *
  * \return 1 on success, 0 on failure.
  */
-int composite_signkey_generate(COMPOSITE_KEY * key,
-                               const char    * const algorithm,
-                               COMPOSITE_CTX * ctx);
+int composite_signkey_generate(COMPOSITE_CTX * ctx,
+                               COMPOSITE_KEY * key,
+                               const char    * const algorithm);
 
 /*!
  * \brief Frees the memory associated with a Composite Key

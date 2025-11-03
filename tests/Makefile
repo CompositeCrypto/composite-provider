@@ -6,10 +6,11 @@ LDFLAGS = -lcrypto
 TEST_SOURCES = test_provider.c
 TEST_TARGET = test_provider
 ENCODING_TEST_TARGET = test_encoding
+SIGKEYGEN_TEST_TARGET = test_sig_keygen
 
 .PHONY: all clean test
 
-all: $(TEST_TARGET) $(ENCODING_TEST_TARGET)
+all: $(TEST_TARGET) $(ENCODING_TEST_TARGET) $(SIGKEYGEN_TEST_TARGET)
 
 $(TEST_TARGET): $(TEST_SOURCES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -17,9 +18,13 @@ $(TEST_TARGET): $(TEST_SOURCES)
 $(ENCODING_TEST_TARGET): test_encoding.c ../src/composite_sig_key.c ../src/composite_sig_encoding.c ../src/composite_kem_key.c ../src/composite_kem_encoding.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test: $(TEST_TARGET) $(ENCODING_TEST_TARGET)
+$(SIGKEYGEN_TEST_TARGET): test_keygen_sig.c ../src/composite_sig_key.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+test: $(TEST_TARGET) $(ENCODING_TEST_TARGET) $(SIGKEYGEN_TEST_TARGET)
 	./$(TEST_TARGET)
 	./$(ENCODING_TEST_TARGET)
+	./$(SIGKEYGEN_TEST_TARGET)
 
 clean:
-	rm -f $(TEST_TARGET) $(ENCODING_TEST_TARGET)
+	rm -f $(TEST_TARGET) $(ENCODING_TEST_TARGET) $(SIGKEYGEN_TEST_TARGET)
