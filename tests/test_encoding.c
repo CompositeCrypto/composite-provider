@@ -27,6 +27,9 @@ static int test_passed = 0;
         return 0; \
     } while(0)
 
+// Traditional key max size for tests
+#define TRAD_KEY_EX_MAX_SIZE 512
+
 /* Test SIG public key encoding/decoding with ML-DSA-44 public key */
 static int test_sig_pubkey_encode_decode_ml_dsa_44(void) {
     TEST_START("SIG public key encode/decode with ML-DSA-44 public key");
@@ -476,6 +479,7 @@ static int test_kem_pubkey_encode_decode_ml_kem_768(void) {
 
 /* Test all ML-KEM variants */
 static int test_all_ml_kem_variants(void) {
+
     TEST_START("All ML-KEM variants");
     
     int variants[] = {ML_KEM_768, ML_KEM_1024};
@@ -484,9 +488,9 @@ static int test_all_ml_kem_variants(void) {
     
     for (int i = 0; i < 2; i++) {
         unsigned char *pq_ct = malloc(ct_sizes[i]);
-        unsigned char *trad_ct = malloc(100);
+        unsigned char *trad_ct = malloc(TRAD_KEY_EX_MAX_SIZE);
         unsigned char *pq_key = malloc(pub_sizes[i]);
-        unsigned char *trad_key = malloc(100);
+        unsigned char *trad_key = malloc(TRAD_KEY_EX_MAX_SIZE);
         size_t encoded_len;
         int ret;
         
@@ -504,7 +508,7 @@ static int test_all_ml_kem_variants(void) {
         memset(trad_key, 0xCD, 100);
         
         /* Test ciphertext encoding */
-        ret = composite_kem_ct_encode(variants[i], pq_ct, ct_sizes[i], trad_ct, 100,
+        ret = composite_kem_ct_encode(variants[i], pq_ct, ct_sizes[i], trad_ct, TRAD_KEY_EX_MAX_SIZE,
                                        NULL, &encoded_len);
         if (!ret) {
             TEST_FAIL("Ciphertext encoding query failed");

@@ -135,14 +135,20 @@ int composite_kemkey_set0_components(COMPOSITE_KEM_KEY * key,
                     // Static Functions Implementations
                     // ================================
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int ml_kem_key_generate(EVP_PKEY_CTX  * ctx, 
                         const char    * algorithm, 
                         COMPOSITE_CTX * composite_ctx) {
+
+    COMPOSITE_DEBUG0("Missing ml_kem_key_generate implementation");
     return 0;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int classic_kex_key_generate(EVP_PKEY_CTX  * ctx, 
                              const char    * algorithm, 
                              COMPOSITE_CTX * composite_ctx) {
+
+    COMPOSITE_DEBUG0("Missing classic_kex_key_generate implementation");
     return 0;
 }

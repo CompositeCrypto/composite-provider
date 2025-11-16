@@ -290,6 +290,10 @@ int composite_algorithm_get_trad_param(const char * composite_algorithm) {
         return NID_secp384r1;
     } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP521_NAME) == 0) {
         return NID_secp521r1;
+    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_BRAINPOOL256_NAME) == 0) {
+        return NID_brainpoolP256r1;
+    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_BRAINPOOL384_NAME) == 0) {
+        return NID_brainpoolP384r1;
     } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_ED25519_NAME) == 0 ||
                strcmp(composite_algorithm, COMPOSITE_MLDSA65_ED25519_NAME) == 0) {
         return 0;
@@ -438,16 +442,11 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
     }
 
     alg_id = classic_id_from_algorithm(algorithm);
-    if (alg_id == 0) {
+    if (alg_id == 0 || curve_or_keysize <= 0) {
         ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
         return NULL;
     }
 
-    if (curve_or_keysize <= 0) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
-        EVP_PKEY_free(pkey);
-        return NULL;
-    }
 
     // Generate the classic key based on the algorithm
     switch (alg_id) {
@@ -459,7 +458,6 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
                                                     curve_or_keysize != 4096) {
                 // We only allow for 2048, 3072, and 4096 bits RSA keys
                 ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
-                EVP_PKEY_free(pkey);
                 return NULL;
             }
             // Generate RSA or RSA-PSS key
@@ -515,12 +513,15 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
                 return NULL;
             }
 
-            // EVP_PKEY_CTX_set_group_name(ctx, OBJ_nid2sn(alg_id));
-
-            EVP_PKEY_CTX_set_group_name(ctx, "P-256");
+            if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, alg_id) <= 0) {
+                ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+                EVP_PKEY_CTX_free(ctx);
+                return NULL;
+            }
+            
             if (!EVP_PKEY_generate(ctx, &pkey)) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-                EVP_PKEY_free(pkey);
+                if (pkey) EVP_PKEY_free(pkey);
                 return NULL;
             }
         } break;
@@ -534,12 +535,11 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
             }
             if (EVP_PKEY_keygen_init(ctx) <= 0) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-                EVP_PKEY_CTX_free(ctx);
                 return NULL;
             }
             if (!EVP_PKEY_generate(ctx, &pkey)) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-                EVP_PKEY_free(pkey);
+                if (pkey) EVP_PKEY_free(pkey);
                 return NULL;
             }
         } break;

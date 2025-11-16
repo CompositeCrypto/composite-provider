@@ -2,26 +2,12 @@
 #define _COMPOSITE_PROVIDER_H
 
 #include "compat.h"
-
 #include "composite_provider.h"
 #include "provider_ctx.h"
 
 BEGIN_C_DECLS
 
-#define COMPOSITE_DEBUG(fmt, ...) \
-    if (getenv("COMPOSITE_DEBUG")) { \
-        printf("[COMPOSITE:DEBUG][%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__); \
-    }
-
-#define COMPOSITE_DEBUG0(text) \
-    COMPOSITE_DEBUG("%s", text)
-
-#define COMPOSITE_ERROR(fmt, ...) \
-    printf("[COMPOSITE:ERROR][%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__);
-
-
-
-    /*! \brief Initialize a provider.
+/*! \brief Initialize a provider.
  *
  * \param core The core handle to use.
  * \param in The input dispatch table.

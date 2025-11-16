@@ -1,8 +1,7 @@
 #ifndef _COMPOSITE_KEM_KEY_H
 #define _COMPOSITE_KEM_KEY_H
 
-#include "compat.h"
-#include "provider_ctx.h"
+#include "provider.h"
 
 #include <openssl/evp.h>
 

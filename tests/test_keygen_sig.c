@@ -33,11 +33,8 @@ static int test_passed = 0;
 #define TEST_LOG0(msg) \
     printf("LOG: %s\n", msg);
 
-#define TEST_LOG1(msg, p1) \
-    printf("LOG: " msg "\n", p1);
-
-#define TEST_LOG2(msg, p1, p2) \
-    printf("LOG: " msg "\n", p1);
+    #define TEST_LOG(fmt, ...) \
+        printf("LOG: " fmt "\n", ##__VA_ARGS__);
 
 /*
  * Helper: detect at runtime if ML-DSA is supported in the current OpenSSL libctx.
@@ -119,7 +116,6 @@ static int test_composite_signkey_generate(void) {
     int ret;
     int expect_success;
 
-    const size_t algorithms_size = 18 /* all values */ - 2 /* commented values */;
     const char *algorithms[] = {
         COMPOSITE_MLDSA44_RSA2048_PSS_NAME,
         COMPOSITE_MLDSA44_RSA2048_NAME,
@@ -140,6 +136,8 @@ static int test_composite_signkey_generate(void) {
         COMPOSITE_MLDSA87_ED448_NAME,
         COMPOSITE_MLDSA87_NISTP521_NAME
     };
+
+    const size_t algorithms_size = sizeof(algorithms) / sizeof(algorithms[0]); // remember to remove commented values */;
 
     /* Setup composite provider context with a fresh OpenSSL libctx */
     COMPOSITE_CTX *provctx = (COMPOSITE_CTX *)malloc(sizeof(COMPOSITE_CTX));
