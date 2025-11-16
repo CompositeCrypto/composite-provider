@@ -15,6 +15,9 @@ BEGIN_C_DECLS
 typedef struct composite_prov_ctx_st {
     const OSSL_CORE_HANDLE *core_handle;
     OSSL_LIB_CTX *libctx;
+
+    int keytype;
+
 } COMPOSITE_CTX;
 
                     // ===================

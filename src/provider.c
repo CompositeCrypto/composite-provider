@@ -81,12 +81,25 @@ static const OSSL_DISPATCH composite_dispatch_table[] = {
 int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
                        const OSSL_DISPATCH *in,
                        const OSSL_DISPATCH **out,
-                       void **provctx)
-{
+                       void **provctx) {
+
     COMPOSITE_CTX *ctx;
+        // Composite provider context
+
+    int rc = 0;
+        // Return code
+
     (void)in; /* Unused */
 
-    ctx = malloc(sizeof(*ctx));
+    // TODO: Initialize OQS-related components
+    // =======================================
+    // if (!oqs_patch_codepoints())
+    //     goto end_init;
+
+    // if (!oqs_patch_oids())
+    //     goto end_init;
+
+    ctx = OPENSSL_malloc(sizeof(*ctx));
     if (ctx == NULL)
         return 0;
 
@@ -100,5 +113,36 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
     *provctx = ctx;
     *out = composite_dispatch_table;
 
-    return 1;
+    // finally, warn if neither default nor fips provider are present:
+    if (!OSSL_PROVIDER_available(ctx->libctx, "default") &&
+        !OSSL_PROVIDER_available(ctx->libctx, "fips")) {
+        COMPOSITE_DEBUG0(
+            "OQS PROV: Default and FIPS provider not available. Errors "
+            "may result.\n");
+    } else {
+        COMPOSITE_DEBUG0("OQS PROV: Default or FIPS provider available.\n");
+    }
+
+    rc = 1;
+
+    if (!rc) {
+
+        // Initialization failed
+        ERR_raise(ERR_LIB_PROV, ERR_R_INIT_FAIL);
+
+        // Clean up the CTX
+        if (ctx) {
+            if (ctx->libctx) { 
+                OSSL_LIB_CTX_free(ctx->libctx);
+            }
+            free(ctx);
+        }
+        
+        if (provctx && *provctx) {
+            composite_teardown(*provctx);
+            *provctx = NULL;
+        }
+    }
+
+    return rc;
 }

@@ -2,7 +2,6 @@
 #define _COMPOSITE_PROVIDER_H
 
 #include "compat.h"
-
 #include "composite_provider.h"
 #include "provider_ctx.h"
 

@@ -79,6 +79,7 @@ static int composite_sig_sign(void *ctx, unsigned char *sig, size_t *siglen,
     
     if (sig == NULL) {
         /* Return required signature size */
+
         *siglen = COMPOSITE_SIG_SIZE;
         return 1;
     }
@@ -168,13 +169,24 @@ static int composite_sig_set_ctx_params(void *ctx, const OSSL_PARAM params[])
                         // Dispatch Tables
                         // ===============
 
-SIG_DISPATCH_TABLE(mldsa44, rsa2048);
-SIG_DISPATCH_TABLE(mldsa44, rsapss);
-SIG_DISPATCH_TABLE(mldsa44, ecdsa_p256);
-SIG_DISPATCH_TABLE(mldsa65, rsa3072);
-SIG_DISPATCH_TABLE(mldsa65, ecdsa_p384);
-SIG_DISPATCH_TABLE(mldsa87, rsa4096);
-SIG_DISPATCH_TABLE(mldsa87, ecdsa_p521);
+// SIG_DISPATCH_TABLE(mldsa44, rsa2048);
+// SIG_DISPATCH_TABLE(mldsa44, rsapss);
+SIG_DISPATCH_TABLE(mldsa44, rsa);
+// SIG_DISPATCH_TABLE(mldsa44, ecdsa_p256);
+SIG_DISPATCH_TABLE(mldsa44, ecdsa);
+SIG_DISPATCH_TABLE(mldsa44, ed25519);
+
+// SIG_DISPATCH_TABLE(mldsa65, rsa3072);
+SIG_DISPATCH_TABLE(mldsa65, rsa);
+// SIG_DISPATCH_TABLE(mldsa65, ecdsa_p384);
+SIG_DISPATCH_TABLE(mldsa65, ecdsa);
+SIG_DISPATCH_TABLE(mldsa65, ed25519);
+
+
+// SIG_DISPATCH_TABLE(mldsa87, rsa4096);
+SIG_DISPATCH_TABLE(mldsa87, rsa);
+SIG_DISPATCH_TABLE(mldsa87, ecdsa);
+SIG_DISPATCH_TABLE(mldsa87, ed448);
 
 // Use a custom dispatch table if special functions are needed
 // const OSSL_DISPATCH composite_mldsa44_rsa2048_signature_functions[] = {
