@@ -83,6 +83,8 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
                        const OSSL_DISPATCH **out,
                        void **provctx) {
 
+//    fprintf(stderr, "Sanity Check\n");
+
     COMPOSITE_CTX *ctx;
         // Composite provider context
 

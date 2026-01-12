@@ -15,7 +15,9 @@ static OSSL_FUNC_signature_digest_sign_fn composite_sig_digest_sign;
 static OSSL_FUNC_signature_digest_verify_init_fn composite_sig_digest_verify_init;
 static OSSL_FUNC_signature_digest_verify_fn composite_sig_digest_verify;
 static OSSL_FUNC_signature_get_ctx_params_fn composite_sig_get_ctx_params;
+static OSSL_FUNC_signature_gettable_ctx_params_fn composite_sig_gettable_ctx_params;
 static OSSL_FUNC_signature_set_ctx_params_fn composite_sig_set_ctx_params;
+static OSSL_FUNC_signature_settable_ctx_params_fn composite_sig_settable_ctx_params;
 
                     // ==================================
                     // Signature function implementations
@@ -23,7 +25,7 @@ static OSSL_FUNC_signature_set_ctx_params_fn composite_sig_set_ctx_params;
 
 static void *composite_sig_newctx(void *provctx, const char *propq)
 {
-    COMPOSITE_SIG_CTX *ctx = malloc(sizeof(COMPOSITE_SIG_CTX));
+    COMPOSITE_SIG_CTX *ctx = OPENSSL_zalloc(sizeof(COMPOSITE_SIG_CTX));
     (void)propq; /* Unused */
     
     if (ctx == NULL)
@@ -91,6 +93,8 @@ static int composite_sig_sign(void *ctx, unsigned char *sig, size_t *siglen,
     memset(sig, 0, COMPOSITE_SIG_SIZE);
     *siglen = COMPOSITE_SIG_SIZE;
     
+
+
     return 1;
 }
 
@@ -157,12 +161,37 @@ static int composite_sig_get_ctx_params(void *ctx, OSSL_PARAM params[])
     return 1;
 }
 
+static const OSSL_PARAM composite_get_ctx_params_list[] = {
+    /*got this values from default provider*/
+    OSSL_PARAM_octet_string(OSSL_SIGNATURE_PARAM_ALGORITHM_ID, NULL, 0),
+    OSSL_PARAM_END};
+
+static const OSSL_PARAM *
+composite_sig_gettable_ctx_params(ossl_unused void *vpoqs_sigctx,
+                            ossl_unused void *vctx) {
+    return composite_get_ctx_params_list;
+}
+
 static int composite_sig_set_ctx_params(void *ctx, const OSSL_PARAM params[])
 {
     (void)ctx; /* Unused */
     (void)params; /* Unused */
     /* Set context parameters */
     return 1;
+}
+
+static const OSSL_PARAM composite_set_ctx_params_list[] = {
+    /*got this values from default provider*/
+    OSSL_PARAM_octet_string(OSSL_SIGNATURE_PARAM_CONTEXT_STRING, NULL, 0),
+    OSSL_PARAM_octet_string(OSSL_SIGNATURE_PARAM_TEST_ENTROPY, NULL, 0),
+    OSSL_PARAM_int(OSSL_SIGNATURE_PARAM_DETERMINISTIC, NULL),
+    OSSL_PARAM_int(OSSL_SIGNATURE_PARAM_MESSAGE_ENCODING, NULL),
+    OSSL_PARAM_END};
+
+static const OSSL_PARAM *
+composite_sig_settable_ctx_params(ossl_unused void *vpsm2ctx,
+                            ossl_unused void *provctx) {
+    return composite_set_ctx_params_list;
 }
 
                         // ===============

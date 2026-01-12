@@ -5,6 +5,8 @@
 #include <openssl/core_dispatch.h>
 #include <openssl/params.h>
 #include <openssl/provider.h>
+#include <openssl/core_names.h>
+#include <openssl/err.h>
 
 /* Provider name and version */
 #define COMPOSITE_PROVIDER_NAME "composite"

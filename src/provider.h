@@ -5,7 +5,11 @@
 #include "composite_provider.h"
 #include "provider_ctx.h"
 
+
+
 BEGIN_C_DECLS
+
+OSSL_provider_init_fn OSSL_provider_init;
 
 /*! \brief Initialize a provider.
  *

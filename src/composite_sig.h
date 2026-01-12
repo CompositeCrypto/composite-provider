@@ -12,15 +12,43 @@
 
 /* Placeholder signature sizes (these would be calculated based on component algorithms) */
 #define COMPOSITE_SIG_SIZE 4096  /* Placeholder: ML-DSA + traditional signature */
+#define COMPOSITE_PREFIX 0x436F6D706F73697465416C676F726974686D5369676E61747572657332303235 /* "CompositeAlgorithmSignatures2025" in hex */ 
+
+/* Composite Labels */
+static const unsigned char *composite_sig_label[] = {
+	(const unsigned char*) "COMPSIG-MLDSA44-RSA2048-PSS-SHA256",
+	(const unsigned char*) "COMPSIG-MLDSA44-RSA2048-PKCS15-SHA256",
+	(const unsigned char*) "COMPSIG-MLDSA44-Ed25519-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA44-ECDSA-P256-SHA256",
+	(const unsigned char*) "COMPSIG-MLDSA65-RSA3072-PSS-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-RSA3072-PKCS15-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-RSA4096-PSS-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-RSA4096-PKCS15-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-ECDSA-P256-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-ECDSA-P384-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-ECDSA-BP256-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA65-Ed25519-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA87-ECDSA-P384-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA87-ECDSA-BP384-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA87-Ed448-SHAKE256",
+	(const unsigned char*) "COMPSIG-MLDSA87-RSA3072-PSS-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA87-RSA4096-PSS-SHA512",
+	(const unsigned char*) "COMPSIG-MLDSA87-ECDSA-P521-SHA512"
+};
 
 /* Signature context structure */
 typedef struct composite_sig_ctx_st {
     COMPOSITE_CTX *provctx;
     const char *algorithm_name;
+    const char *pre_hash_func;
+    const char *label;
+    const char *ml_dsa;
+    EVP_MD_CTX *evp_ctx;
     /* Key material would go here */
     unsigned char *sig_buffer;
     size_t sig_buffer_len;
-} COMPOSITE_SIG_CTX;
+}COMPOSITE_SIG_CTX;
+
 
 #define DECLARE_SIG_DISPATCH_TABLE(alg_name, alg2_name) \
     const OSSL_DISPATCH composite_##alg_name##_##alg2_name##_signature_functions[];
@@ -41,7 +69,9 @@ typedef struct composite_sig_ctx_st {
         { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY_INIT, (void (*)(void))composite_sig_digest_verify_init }, \
         { OSSL_FUNC_SIGNATURE_DIGEST_VERIFY, (void (*)(void))composite_sig_digest_verify }, \
         { OSSL_FUNC_SIGNATURE_GET_CTX_PARAMS, (void (*)(void))composite_sig_get_ctx_params }, \
+        { OSSL_FUNC_SIGNATURE_GETTABLE_CTX_PARAMS, (void (*)(void))composite_sig_gettable_ctx_params }, \
         { OSSL_FUNC_SIGNATURE_SET_CTX_PARAMS, (void (*)(void))composite_sig_set_ctx_params }, \
+        { OSSL_FUNC_SIGNATURE_SETTABLE_CTX_PARAMS, (void (*)(void))composite_sig_settable_ctx_params }, \
         {0, NULL} \
     }
 
