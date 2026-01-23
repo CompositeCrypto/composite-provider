@@ -57,14 +57,14 @@ static int test_composite_signkey_generate_null_args(void) {
     COMPOSITE_KEY *key = composite_signkey_new();
 
     /* NULL ctx */
-    ret = composite_signkey_generate(NULL, key, COMPOSITE_MLDSA44_NISTP256_NAME);
+    ret = composite_signkey_generate(NULL, key, MLDSA44_P256_SN);
     if (ret) {
         TEST_FAIL("Expected failure with NULL ctx");
     }
 
     /* NULL key */
     COMPOSITE_CTX dummy_ctx = {0};
-    ret = composite_signkey_generate(&dummy_ctx, NULL, COMPOSITE_MLDSA44_NISTP256_NAME);
+    ret = composite_signkey_generate(&dummy_ctx, NULL, MLDSA44_P256_SN);
     if (ret) {
         TEST_FAIL("Expected failure with NULL key");
     }
@@ -117,24 +117,24 @@ static int test_composite_signkey_generate(void) {
     int expect_success;
 
     const char *algorithms[] = {
-        COMPOSITE_MLDSA44_RSA2048_PSS_NAME,
-        COMPOSITE_MLDSA44_RSA2048_NAME,
-        COMPOSITE_MLDSA44_ED25519_NAME,
-        COMPOSITE_MLDSA44_NISTP256_NAME,
-        COMPOSITE_MLDSA65_RSA3072_PSS_NAME,
-        COMPOSITE_MLDSA65_RSA3072_NAME,
-        COMPOSITE_MLDSA65_RSA4096_PSS_NAME,
-        COMPOSITE_MLDSA65_RSA4096_NAME,
-        COMPOSITE_MLDSA65_NISTP256_NAME,
-        COMPOSITE_MLDSA65_NISTP384_NAME,
-        COMPOSITE_MLDSA65_BRAINPOOL256_NAME,
-        COMPOSITE_MLDSA65_ED25519_NAME,
-        COMPOSITE_MLDSA87_RSA3072_PSS_NAME,
-        COMPOSITE_MLDSA87_RSA4096_PSS_NAME,
-        COMPOSITE_MLDSA87_NISTP384_NAME,
-        COMPOSITE_MLDSA87_BRAINPOOL384_NAME,
-        COMPOSITE_MLDSA87_ED448_NAME,
-        COMPOSITE_MLDSA87_NISTP521_NAME
+        MLDSA44_RSA2048_PSS_SN,
+        MLDSA44_RSA2048_PKCS15_SN,
+        MLDSA44_ED25519_SN,
+        MLDSA44_P256_SN,
+        MLDSA65_RSA3072_PSS_SN,
+        MLDSA65_RSA3072_PKCS15_SN,
+        MLDSA65_RSA4096_PSS_SN,
+        MLDSA65_RSA4096_PKCS15_SN,
+        MLDSA65_P256_SN,
+        MLDSA65_P384_SN,
+        MLDSA65_BRAINPOOLP256_SN,
+        MLDSA65_ED25519_SN,
+        MLDSA87_RSA3072_PSS_SN,
+        MLDSA87_RSA4096_PSS_SN,
+        MLDSA87_P384_SN,
+        MLDSA87_BRAINPOOLP384_SN,
+        MLDSA87_ED448_SN,
+        MLDSA87_P521_SN
     };
 
     const size_t algorithms_size = sizeof(algorithms) / sizeof(algorithms[0]); // remember to remove commented values */;
