@@ -49,22 +49,29 @@ int composite_kemkey_generate(COMPOSITE_KEM_KEY * key,
                               const char    * const algorithm,
                               COMPOSITE_CTX * ctx) {
 
-        if (key == NULL || algorithm == NULL || ctx == NULL) {
-            ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
-            return 0;
-        }
+    if (key == NULL || algorithm == NULL || ctx == NULL) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        return 0;
+    }
 
-        // Generate key material for ML-KEM component
-        if (!ml_kem_key_generate(key->ml_kem_ctx, algorithm, ctx)) {
-            ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-            return 0;
-        }
+    // Generate key material for ML-KEM component
+    if (!ml_kem_key_generate(key->ml_kem_ctx, algorithm, ctx)) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        return 0;
+    }
 
-        // Generate key material for classic component
-        if (!classic_kex_key_generate(key->classic_ctx, algorithm, ctx)) {
-            ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-            return 0;
-        }
+    // Generate key material for classic component
+    if (!classic_kex_key_generate(key->classic_ctx, algorithm, ctx)) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        return 0;
+    }
+
+    if (!composite_kemkey_set0_components(key,
+        EVP_PKEY_CTX_get0_pkey(key->mlkem_key),
+        EVP_PKEY_CTX_get0_pkey(key->classic_key))) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        return 0;
+    }
 
     return 1;
 }
@@ -136,12 +143,30 @@ int composite_kemkey_set0_components(COMPOSITE_KEM_KEY * key,
                     // ================================
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int ml_kem_key_generate(EVP_PKEY_CTX  * ctx, 
+int ml_kem_key_generate(EVP_PKEY_CTX  * ctx,
                         const char    * algorithm, 
                         COMPOSITE_CTX * composite_ctx) {
 
-    COMPOSITE_DEBUG0("Missing ml_kem_key_generate implementation");
-    return 0;
+    EVP_PKEY *pkey = NULL;
+
+    /* Set context for key generation*/
+    ctx = EVP_PKEY_CTX_new_from_name(composite_ctx->libctx, algorithm, NULL);
+    if (ctx == NULL) {
+        return 0;
+    }
+
+    /* Initialize key generation */
+    if (EVP_PKEY_keygen_init(ctx) <= 0) {
+        return 0;
+    }
+
+    if (EVP_PKEY_keygen(ctx, &pkey) <= 0){
+        return 0;
+    }
+
+    EVP_PKEY_free(pkey);
+
+    return 1;
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -149,6 +174,28 @@ int classic_kex_key_generate(EVP_PKEY_CTX  * ctx,
                              const char    * algorithm, 
                              COMPOSITE_CTX * composite_ctx) {
 
-    COMPOSITE_DEBUG0("Missing classic_kex_key_generate implementation");
-    return 0;
+    EVP_PKEY *pkey = NULL;
+
+    /* Set context for key generation*/
+    ctx = EVP_PKEY_CTX_new_from_name(composite_ctx->libctx, algorithm, NULL);
+    if (ctx == NULL) {
+        return 0;
+    }
+
+    /* Initialize key generation */
+    if (EVP_PKEY_keygen_init(ctx) <= 0) {
+        return 0;
+    }
+
+    if (EVP_PKEY_keygen(ctx, &pkey) <= 0){
+        return 0;
+    }
+
+    EVP_PKEY *ctx_pkey = EVP_PKEY_CTX_get0_pkey(ctx);
+
+    COMPOSITE_DEBUG2("ctx key:  %p, pkey: %p", ctx_pkey, pkey);
+
+    EVP_PKEY_free(pkey);
+
+    return 1;
 }

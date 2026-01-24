@@ -39,7 +39,9 @@ typedef struct composite_kem_ctx_st {
         { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init }, \
         { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate }, \
         { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params }, \
+        { OSSL_FUNC_KEM_GETTABLE_CTX_PARAMS, (void (*)(void))composite_kem_gettable_ctx_params }, \
         { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params }, \
+        { OSSL_FUNC_KEM_SETTABLE_CTX_PARAMS, (void (*)(void))composite_kem_settable_ctx_params }, \
         { 0, NULL } \
     };
 

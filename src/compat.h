@@ -36,10 +36,17 @@ and ANSI C compilers can issue warnings about type mismatches. */
 #define COMPOSITE_DEBUG(fmt, ...) \
     if (getenv("COMPOSITE_DEBUG")) { \
         printf("[COMPOSITE:DEBUG][%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__); \
+        printf("\n"); \
     }
 
 #define COMPOSITE_DEBUG0(text) \
     COMPOSITE_DEBUG("%s", text)
+
+#define COMPOSITE_DEBUG1(fmt, arg) \
+    COMPOSITE_DEBUG(fmt, arg)
+
+#define COMPOSITE_DEBUG2(fmt, arg1, arg2) \
+    COMPOSITE_DEBUG(fmt, arg1, arg2)
 
 #define COMPOSITE_ERROR(fmt, ...) \
     printf("[COMPOSITE:ERROR][%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__);
