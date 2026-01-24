@@ -182,24 +182,24 @@ const char * composite_algorithm_get_mldsa_name(const char * composite_algorithm
         return NULL;
     }
 
-    if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_RSA2048_PSS_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA44_RSA2048_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA44_ED25519_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA44_NISTP256_NAME) == 0) {
+    if (strcmp(composite_algorithm, MLDSA44_RSA2048_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA44_RSA2048_PKCS15_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA44_ED25519_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA44_P256_SN) == 0) {
         return DEFAULT_MLDSA44_NAME;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_ED25519_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP256_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP384_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_ED25519_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA3072_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA3072_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA4096_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA4096_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_P256_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_P384_SN) == 0) {
         return DEFAULT_MLDSA65_NAME;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA3072_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA4096_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_ED448_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP384_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP521_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_RSA3072_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_RSA4096_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_ED448_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_P384_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_P521_SN) == 0) {
         return DEFAULT_MLDSA87_NAME;
     }
 
@@ -213,48 +213,48 @@ const char * composite_algorithm_get_trad_name(const char * composite_algorithm)
         return NULL;
     }
 
-    if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_RSA2048_PSS_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_PSS_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_PSS_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA3072_PSS_NAME) == 0 ||
-        strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA4096_PSS_NAME) == 0) {
+    if (strcmp(composite_algorithm, MLDSA44_RSA2048_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA65_RSA3072_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA65_RSA4096_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA87_RSA3072_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA87_RSA4096_PSS_SN) == 0) {
 
         return DEFAULT_RSA_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_RSA2048_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA44_RSA2048_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA3072_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA4096_PKCS15_SN) == 0) {
 
         return DEFAULT_RSAPSS_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_ED25519_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_ED25519_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA44_ED25519_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_ED25519_SN) == 0) {
 
         return DEFAULT_ED25519_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_ED448_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_ED448_SN) == 0) {
 
         return DEFAULT_ED448_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_NISTP256_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP256_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA44_P256_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_P256_SN) == 0) {
 
         return DEFAULT_ECDSA_NISTP256_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP384_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP384_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_P384_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_P384_SN) == 0) {
 
         return DEFAULT_ECDSA_NISTP384_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP521_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_P521_SN) == 0) {
 
         return DEFAULT_ECDSA_NISTP521_NAME;
     
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_BRAINPOOL256_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_BRAINPOOLP256_SN) == 0) {
 
         return DEFAULT_ECDSA_BRAINPOOL256_NAME;
 
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_BRAINPOOL384_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_BRAINPOOLP384_SN) == 0) {
 
         return DEFAULT_ECDSA_BRAINPOOL384_NAME;
 
@@ -272,32 +272,32 @@ int composite_algorithm_get_trad_param(const char * composite_algorithm) {
         return 0;
     }
 
-    if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_RSA2048_PSS_NAME) == 0) {
+    if (strcmp(composite_algorithm, MLDSA44_RSA2048_PSS_SN) == 0) {
         return 2048;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA3072_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA3072_PSS_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_RSA3072_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA3072_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_RSA3072_PSS_SN) == 0) {
         return 3072;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_PSS_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_RSA4096_NAME) == 0 ||               
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_RSA4096_PSS_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_RSA4096_PSS_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_RSA4096_PKCS15_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_RSA4096_PSS_SN) == 0) {
         return 4096;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_NISTP256_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP256_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA44_P256_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_P256_SN) == 0) {
         return NID_X9_62_prime256v1;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_NISTP384_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP384_NAME) == 0){
+    } else if (strcmp(composite_algorithm, MLDSA65_P384_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_P384_SN) == 0){
         return NID_secp384r1;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_NISTP521_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_P521_SN) == 0) {
         return NID_secp521r1;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA65_BRAINPOOL256_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA65_BRAINPOOLP256_SN) == 0) {
         return NID_brainpoolP256r1;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_BRAINPOOL384_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_BRAINPOOLP384_SN) == 0) {
         return NID_brainpoolP384r1;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA44_ED25519_NAME) == 0 ||
-               strcmp(composite_algorithm, COMPOSITE_MLDSA65_ED25519_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA44_ED25519_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_ED25519_SN) == 0) {
         return 0;
-    } else if (strcmp(composite_algorithm, COMPOSITE_MLDSA87_ED448_NAME) == 0) {
+    } else if (strcmp(composite_algorithm, MLDSA87_ED448_SN) == 0) {
         return 0;
     }
 
