@@ -71,7 +71,7 @@ typedef struct composite_kemkey_st {
     // ML-KEM component and context
     const char *mlkem_name;
     EVP_PKEY_CTX *ml_kem_ctx;
-    EVP_KEM *mlkem_key;
+    EVP_PKEY *mlkem_key;
 
     // ML-KEM public and private keys
     void *mlkem_privkey;
@@ -102,7 +102,7 @@ COMPOSITE_KEM_KEY * composite_kemkey_new(void);
 /*!
  * \brief Generates the cryptographic key material for a Composite Key
  *
- * This function generates the key material for both the ML-DSA and
+ * This function generates the key material for both the ML-KEM and
  * traditional components of the Composite Key based on the specified
  * algorithm.
  * 
@@ -126,36 +126,36 @@ void composite_kemkey_free(COMPOSITE_KEM_KEY * key);
 /*!
  * \brief Retrieves the components of a Composite Key
  *
- * This function retrieves the ML-DSA key and traditional key components of
+ * This function retrieves the ML-KEM key and traditional key components of
  * a Composite Key. The returned pointers are only valid as long as the
  * Composite Key is not modified or freed (i.e., they are still owned by)
  * the Composite Key and the caller SHALL NOT free them.
  * 
  * \param[in] key The Composite Key to retrieve components from.
- * \param[out] ml_dsa_key Pointer to store the ML-DSA key.
+ * \param[out] ml_kem_key Pointer to store the ML-DSA key.
  * \param[out] trad_key Pointer to store the traditional key.
  * 
  * \return 1 on success, 0 on failure.
  */
 int composite_kemkey_get0_components(const COMPOSITE_KEM_KEY  * const key, 
-                                     EVP_PKEY                ** const ml_dsa_key,
+                                     EVP_PKEY                ** const ml_kem_key,
                                      EVP_PKEY                ** const trad_key);
 
 /*!
  * \brief Sets the components of a Composite Key
  *
- * This function sets the ML-DSA key and traditional key components of
+ * This function sets the ML-KEM key and traditional key components of
  * a Composite Key. The components are transferred (moved) to the new
  * Composite Key and the caller SHALL NOT free them.
  *
  * \param[in] key The Composite Key to set components for.
- * \param[in] ml_dsa_key The ML-DSA key to set.
+ * \param[in] ml_kem_key The ML-DSA key to set.
  * \param[in] trad_key The traditional key to set.
  * 
  * \return 1 on success, 0 on failure.
  */
 int composite_kemkey_set0_components(COMPOSITE_KEM_KEY * key, 
-                                     EVP_PKEY          * ml_dsa_key,
+                                     EVP_PKEY          * ml_kem_key,
                                      EVP_PKEY          * trad_key);
 
 
