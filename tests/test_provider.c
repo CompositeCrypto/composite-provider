@@ -117,10 +117,12 @@ static int test_provider_algorithms(void)
         printf("FAILED: Could not fetch ML-KEM-768-ECDH-P384\n");
         return 0;
     }
-
     COMPOSITE_DEBUG2("Fetched EVP_KEM: %s Provider: %s",
         EVP_KEM_get0_name(mlkem768_ecdhP384),
         OSSL_PROVIDER_get0_name(EVP_KEM_get0_provider(mlkem768_ecdhP384)));
+    
+    EVP_KEM_free(mlkem768_ecdhP384);
+    
     /*
      * Note: Actual algorithm queries would require more complex testing
      * with EVP_SIGNATURE and EVP_KEM APIs. This test just verifies that
