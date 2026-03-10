@@ -67,8 +67,8 @@ int composite_kemkey_generate(COMPOSITE_KEM_KEY * key,
     }
 
     if (!composite_kemkey_set0_components(key,
-        EVP_PKEY_CTX_get0_pkey(key->mlkem_key),
-        EVP_PKEY_CTX_get0_pkey(key->classic_key))) {
+                                          key->mlkem_key,
+                                          key->classic_key)) {
         ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
         return 0;
     }
@@ -193,7 +193,7 @@ int classic_kex_key_generate(EVP_PKEY_CTX  * ctx,
 
     EVP_PKEY *ctx_pkey = EVP_PKEY_CTX_get0_pkey(ctx);
 
-    COMPOSITE_DEBUG2("ctx key:  %p, pkey: %p", ctx_pkey, pkey);
+    COMPOSITE_DEBUG2("ctx key:  %p, pkey: %p", (void *)ctx_pkey, (void *)pkey);
 
     EVP_PKEY_free(pkey);
 
