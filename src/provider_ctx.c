@@ -2,17 +2,19 @@
 
 COMPOSITE_CTX *COMPOSITE_PROVIDER_CTX_new(const OSSL_CORE_HANDLE *core_handle, OSSL_LIB_CTX *libctx) {
 
-    COMPOSITE_CTX *provctx = (COMPOSITE_CTX *)malloc(sizeof(COMPOSITE_CTX));
+    COMPOSITE_CTX *provctx = (COMPOSITE_CTX *)OPENSSL_malloc(sizeof(COMPOSITE_CTX));
 
     if (!provctx) {
         return 0;
     }
 
+    (void)core_handle; /* Unused */
+
     memset(provctx, 0, sizeof(*provctx));
-    provctx->libctx = OSSL_LIB_CTX_new();
+    provctx->libctx = libctx ? libctx : OSSL_LIB_CTX_new();
 
     if (!provctx->libctx) {
-        free(provctx);
+        OPENSSL_free(provctx);
         return 0;
     }
     return provctx;
