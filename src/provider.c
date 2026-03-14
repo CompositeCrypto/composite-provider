@@ -54,6 +54,8 @@ const OSSL_ALGORITHM *composite_query_operation(void *provctx, int operation_id,
         return composite_signature_algorithms(provctx);
     case OSSL_OP_KEM:
         return composite_kem_algorithms(provctx);
+    case OSSL_OP_KEYMGMT:
+        return composite_keymgmt(provctx);
     }
 
     return NULL;
@@ -83,7 +85,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
                        const OSSL_DISPATCH **out,
                        void **provctx) {
 
-//    fprintf(stderr, "Sanity Check\n");
+    fprintf(stderr, "Sanity Check\n");
 
     COMPOSITE_CTX *ctx;
         // Composite provider context

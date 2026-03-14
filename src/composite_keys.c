@@ -46,3 +46,8 @@ COMPOSITE_KEY *composite_key_new(COMPOSITE_CTX *ctx, const char *propq, int comp
     COMPOSITE_DEBUG("composite_key_new: Created new composite key context");
     return key;
 }
+
+void composite_free_key(COMPOSITE_KEY *key){
+
+
+}
