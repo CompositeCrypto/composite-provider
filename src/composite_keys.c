@@ -27,8 +27,6 @@ typedef struct composite_key_st {
 
 COMPOSITE_KEY *composite_key_new(COMPOSITE_CTX *ctx, const char *propq, int composite_alg_id) {
     
-    int ret = 0;
-    
     COMPOSITE_KEY *key = NULL;
 
     // Missing implementation
@@ -47,7 +45,10 @@ COMPOSITE_KEY *composite_key_new(COMPOSITE_CTX *ctx, const char *propq, int comp
     return key;
 }
 
+<<<<<<< HEAD
 void composite_free_key(COMPOSITE_KEY *key){
 
 
 }
+=======
+>>>>>>> main

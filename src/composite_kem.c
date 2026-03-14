@@ -11,7 +11,9 @@ static OSSL_FUNC_kem_encapsulate_fn composite_kem_encapsulate;
 static OSSL_FUNC_kem_decapsulate_init_fn composite_kem_decapsulate_init;
 static OSSL_FUNC_kem_decapsulate_fn composite_kem_decapsulate;
 static OSSL_FUNC_kem_get_ctx_params_fn composite_kem_get_ctx_params;
+static OSSL_FUNC_kem_gettable_ctx_params_fn composite_kem_gettable_ctx_params;
 static OSSL_FUNC_kem_set_ctx_params_fn composite_kem_set_ctx_params;
+static OSSL_FUNC_kem_settable_ctx_params_fn composite_kem_settable_ctx_params;
 
                     // ==================================
                     // Signature function implementations
@@ -142,6 +144,22 @@ static int composite_kem_set_ctx_params(void *ctx, const OSSL_PARAM params[])
     (void)params; /* Unused */
     /* Set context parameters */
     return 1;
+}
+
+static const OSSL_PARAM *composite_kem_settable_ctx_params(ossl_unused void *vctx,
+    ossl_unused void *provctx)
+{
+    static const OSSL_PARAM known_settable_ctx_params[] = { OSSL_PARAM_END };
+
+    return known_settable_ctx_params;
+}
+
+static const OSSL_PARAM *composite_kem_gettable_ctx_params(ossl_unused void *vctx,
+    ossl_unused void *provctx)
+{
+    static const OSSL_PARAM known_gettable_ctx_params[] = { OSSL_PARAM_END };
+
+    return known_gettable_ctx_params;
 }
 
 KEM_DISPATCH_TABLE(mlkem512, ecdh_p256)

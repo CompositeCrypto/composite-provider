@@ -80,27 +80,28 @@ int composite_signkey_generate(COMPOSITE_CTX * ctx,
     trad_alg = composite_algorithm_get_trad_name(algorithm);
     trad_param = composite_algorithm_get_trad_param(algorithm);
     if (mldsa_alg == NULL || trad_alg == NULL || trad_param == 0) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        fprintf(stderr, "Unsupported algorithm: %s, mldsa: %s, trad: %s\n", algorithm, mldsa_alg, trad_alg);
         return 0;
     }
 
     // Generate key material for ML-DSA component
     ml_dsa_key = ml_dsa_key_generate(ctx, mldsa_alg);
     if (ml_dsa_key == NULL) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        fprintf(stderr, "ML-DSA key generation failed for algorithm: %s\n", mldsa_alg);
         return 0;
     }
 
     // Generate key material for classic component
     classic_key = classic_key_generate(ctx, trad_alg, trad_param);
     if (classic_key == NULL) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+        fprintf(stderr, "Classic key generation failed for algorithm: %s with param: %d\n", trad_alg, trad_param);
         EVP_PKEY_free(ml_dsa_key);
         return 0;
     }
 
     // Assign generated keys to composite key structure
     if (!composite_signkey_set0_components(key, ml_dsa_key, classic_key)) {
+        fprintf(stderr, "Failed to set components for composite key\n");
         EVP_PKEY_free(ml_dsa_key);
         EVP_PKEY_free(classic_key);
         return 0;
