@@ -192,13 +192,15 @@ const char * composite_algorithm_get_mldsa_name(const char * composite_algorithm
                strcmp(composite_algorithm, MLDSA65_RSA4096_PSS_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_RSA4096_PKCS15_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_P256_SN) == 0 ||
-               strcmp(composite_algorithm, MLDSA65_P384_SN) == 0) {
+               strcmp(composite_algorithm, MLDSA65_P384_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA65_BRAINPOOLP256_SN) == 0) {
         return DEFAULT_MLDSA65_NAME;
     } else if (strcmp(composite_algorithm, MLDSA87_RSA3072_PSS_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA87_RSA4096_PSS_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA87_ED448_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA87_P384_SN) == 0 ||
-               strcmp(composite_algorithm, MLDSA87_P521_SN) == 0) {
+               strcmp(composite_algorithm, MLDSA87_P521_SN) == 0 ||
+               strcmp(composite_algorithm, MLDSA87_BRAINPOOLP384_SN) == 0) {
         return DEFAULT_MLDSA87_NAME;
     }
 

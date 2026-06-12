@@ -132,14 +132,14 @@ static int composite_spki_decode(void *vctx, OSSL_CORE_BIO *cin,
 
     /* BIT STRING content = raw mldsa_pub || classic_pub bytes */
     bs = d2i_ASN1_BIT_STRING(NULL, &p, derbuf + derlen - p);
-    if (bs == NULL || bs->data == NULL || bs->length <= 0)
+    if (bs == NULL || ASN1_STRING_get0_data(bs) == NULL || ASN1_STRING_length(bs) <= 0)
         goto done;
 
     key = composite_key_new(ctx->provctx, ctx->composite_name);
     if (key == NULL)
         goto done;
 
-    if (!composite_sig_pubkey_decode(key, bs->data, (size_t)bs->length))
+    if (!composite_sig_pubkey_decode(key, ASN1_STRING_get0_data(bs), (size_t)ASN1_STRING_length(bs)))
         goto done;
 
     /* Pass the key back to the framework via KEYMGMT_LOAD reference */

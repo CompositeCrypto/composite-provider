@@ -210,6 +210,58 @@ test_encoding/fast:
 	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_encoding.dir/build.make tests/CMakeFiles/test_encoding.dir/build
 .PHONY : test_encoding/fast
 
+#=============================================================================
+# Target rules for targets named test_keygen_sig
+
+# Build rule for target.
+test_keygen_sig: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_keygen_sig
+.PHONY : test_keygen_sig
+
+# fast build rule for target.
+test_keygen_sig/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_keygen_sig.dir/build.make tests/CMakeFiles/test_keygen_sig.dir/build
+.PHONY : test_keygen_sig/fast
+
+#=============================================================================
+# Target rules for targets named test_evp_keygen
+
+# Build rule for target.
+test_evp_keygen: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_evp_keygen
+.PHONY : test_evp_keygen
+
+# fast build rule for target.
+test_evp_keygen/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_evp_keygen.dir/build.make tests/CMakeFiles/test_evp_keygen.dir/build
+.PHONY : test_evp_keygen/fast
+
+#=============================================================================
+# Target rules for targets named test_sign_verify
+
+# Build rule for target.
+test_sign_verify: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_sign_verify
+.PHONY : test_sign_verify
+
+# fast build rule for target.
+test_sign_verify/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_sign_verify.dir/build.make tests/CMakeFiles/test_sign_verify.dir/build
+.PHONY : test_sign_verify/fast
+
+#=============================================================================
+# Target rules for targets named test_oid_registration
+
+# Build rule for target.
+test_oid_registration: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_oid_registration
+.PHONY : test_oid_registration
+
+# fast build rule for target.
+test_oid_registration/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_oid_registration.dir/build.make tests/CMakeFiles/test_oid_registration.dir/build
+.PHONY : test_oid_registration/fast
+
 src/composite_decoder.o: src/composite_decoder.c.o
 .PHONY : src/composite_decoder.o
 
@@ -513,7 +565,11 @@ help:
 	@echo "... test"
 	@echo "... composite"
 	@echo "... test_encoding"
+	@echo "... test_evp_keygen"
+	@echo "... test_keygen_sig"
+	@echo "... test_oid_registration"
 	@echo "... test_provider"
+	@echo "... test_sign_verify"
 	@echo "... src/composite_decoder.o"
 	@echo "... src/composite_decoder.i"
 	@echo "... src/composite_decoder.s"

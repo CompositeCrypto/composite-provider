@@ -5,7 +5,7 @@
 #include <openssl/params.h>
 #include <openssl/types.h>
 #include <openssl/core_names.h>
-#include "composite_kem_key.h"
+#include <openssl/evp.h>
 
 /*
  * Test program for the Composite Provider
@@ -117,7 +117,7 @@ static int test_provider_algorithms(void)
         printf("FAILED: Could not fetch ML-KEM-768-ECDH-P384\n");
         return 0;
     }
-    COMPOSITE_DEBUG2("Fetched EVP_KEM: %s Provider: %s",
+    printf("Fetched EVP_KEM: %s Provider: %s\n",
         EVP_KEM_get0_name(mlkem768_ecdhP384),
         OSSL_PROVIDER_get0_name(EVP_KEM_get0_provider(mlkem768_ecdhP384)));
     
