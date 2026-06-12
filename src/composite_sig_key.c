@@ -1,4 +1,5 @@
 #include "composite_sig_key.h"
+#include <openssl/objects.h>
 
                     // ===========================
                     // Static Functions Prototypes
@@ -10,9 +11,6 @@ int classic_id_from_algorithm(const char * algorithm);
 int composite_algorithm_get_trad_param(const char * composite_algorithm);
 const char * composite_algorithm_get_trad_name(const char * composite_algorithm);
 const char * composite_algorithm_get_mldsa_name(const char * composite_algorithm);
-
-EVP_PKEY * ml_dsa_key_generate(COMPOSITE_CTX *composite_ctx, const char *algorithm);
-EVP_PKEY * classic_key_generate(COMPOSITE_CTX *composite_ctx, const char *algorithm, int param);
 
                     // ================
                     // Public Functions
@@ -226,7 +224,7 @@ const char * composite_algorithm_get_trad_name(const char * composite_algorithm)
                strcmp(composite_algorithm, MLDSA65_RSA3072_PKCS15_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_RSA4096_PKCS15_SN) == 0) {
 
-        return DEFAULT_RSAPSS_NAME;
+        return DEFAULT_RSA_NAME;
 
     } else if (strcmp(composite_algorithm, MLDSA44_ED25519_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_ED25519_SN) == 0) {
@@ -273,7 +271,8 @@ int composite_algorithm_get_trad_param(const char * composite_algorithm) {
         return 0;
     }
 
-    if (strcmp(composite_algorithm, MLDSA44_RSA2048_PSS_SN) == 0) {
+    if (strcmp(composite_algorithm, MLDSA44_RSA2048_PSS_SN) == 0 ||
+        strcmp(composite_algorithm, MLDSA44_RSA2048_PKCS15_SN) == 0) {
         return 2048;
     } else if (strcmp(composite_algorithm, MLDSA65_RSA3072_PSS_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_RSA3072_PKCS15_SN) == 0 ||
@@ -297,9 +296,9 @@ int composite_algorithm_get_trad_param(const char * composite_algorithm) {
         return NID_brainpoolP384r1;
     } else if (strcmp(composite_algorithm, MLDSA44_ED25519_SN) == 0 ||
                strcmp(composite_algorithm, MLDSA65_ED25519_SN) == 0) {
-        return 0;
+        return -1;
     } else if (strcmp(composite_algorithm, MLDSA87_ED448_SN) == 0) {
-        return 0;
+        return -1;
     }
 
     // Unknown composite algorithm
@@ -380,11 +379,7 @@ EVP_PKEY * ml_dsa_key_generate(COMPOSITE_CTX * composite_ctx,
         return NULL;
     }
 
-    pkey = EVP_PKEY_new();
-    if (pkey == NULL) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
-        return NULL;
-    }
+    /* pkey = NULL; EVP_PKEY_generate will allocate the key */
 
     // Generate the ML-DSA key based on the algorithm
     switch (alg_id) {
@@ -418,9 +413,10 @@ EVP_PKEY * ml_dsa_key_generate(COMPOSITE_CTX * composite_ctx,
                 (EVP_PKEY_generate(pctx, &pkey) <= 0)) {
         ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
         EVP_PKEY_CTX_free(pctx);
+        EVP_PKEY_free(pkey);
         return NULL;
     }
-
+    EVP_PKEY_CTX_free(pctx);
     return pkey;
 }
 
@@ -443,7 +439,12 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
     }
 
     alg_id = classic_id_from_algorithm(algorithm);
-    if (alg_id == 0 || curve_or_keysize <= 0) {
+    if (alg_id == 0) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        return NULL;
+    }
+    /* Ed25519/Ed448 don't need a curve/size parameter */
+    if (alg_id != NID_ED25519 && alg_id != NID_ED448 && curve_or_keysize <= 0) {
         ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
         return NULL;
     }
@@ -485,9 +486,10 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
             /* Generate key */
             if (!EVP_PKEY_generate(ctx, &pkey)) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-                EVP_PKEY_free(pkey);
+                EVP_PKEY_CTX_free(ctx);
                 return NULL;
             }
+            EVP_PKEY_CTX_free(ctx);
         } break;
 
         case NID_X9_62_prime256v1:
@@ -503,12 +505,6 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
             }
 
             if (EVP_PKEY_keygen_init(ctx) <= 0) {
-                ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-                EVP_PKEY_CTX_free(ctx);
-                return NULL;
-            }
-
-            if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, alg_id) <= 0) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
                 EVP_PKEY_CTX_free(ctx);
                 return NULL;
@@ -570,4 +566,140 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
     }
 
     return pkey;
+}
+
+// =============================================
+// Algorithm Information Table (18 algorithms)
+// =============================================
+
+/* DER encodings of hash OIDs */
+static const unsigned char sha256_oid_der[]  = {0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x01};
+static const unsigned char sha512_oid_der[]  = {0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03};
+static const unsigned char shake256_oid_der[] = {0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x0c};
+
+static const COMPOSITE_ALG_INFO composite_alg_table[] = {
+    /* ML-DSA-44 combinations */
+    { MLDSA44_RSA2048_PSS_SN,     ML_DSA_44, DEFAULT_MLDSA44_NAME,
+      COMP_CLASSIC_RSA_PSS,   DEFAULT_RSA_NAME,     2048,
+      "SHA-256", sha256_oid_der,  sizeof(sha256_oid_der),
+      ML_DSA_44_SIG_SZ, ML_DSA_44_PUB_KEY_SZ,
+      "COMPSIG-MLDSA44-RSA2048-PSS-SHA256", "SHA-256" },
+
+    { MLDSA44_RSA2048_PKCS15_SN,  ML_DSA_44, DEFAULT_MLDSA44_NAME,
+      COMP_CLASSIC_RSA_PKCS15, DEFAULT_RSA_NAME,    2048,
+      "SHA-256", sha256_oid_der,  sizeof(sha256_oid_der),
+      ML_DSA_44_SIG_SZ, ML_DSA_44_PUB_KEY_SZ,
+      "COMPSIG-MLDSA44-RSA2048-PKCS15-SHA256", "SHA-256" },
+
+    { MLDSA44_ED25519_SN,         ML_DSA_44, DEFAULT_MLDSA44_NAME,
+      COMP_CLASSIC_ED25519, DEFAULT_ED25519_NAME,   -1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_44_SIG_SZ, ML_DSA_44_PUB_KEY_SZ,
+      "COMPSIG-MLDSA44-Ed25519-SHA512", NULL },
+
+    { MLDSA44_P256_SN,            ML_DSA_44, DEFAULT_MLDSA44_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_NISTP256_NAME, NID_X9_62_prime256v1,
+      "SHA-256", sha256_oid_der,  sizeof(sha256_oid_der),
+      ML_DSA_44_SIG_SZ, ML_DSA_44_PUB_KEY_SZ,
+      "COMPSIG-MLDSA44-ECDSA-P256-SHA256", "SHA-256" },
+
+    /* ML-DSA-65 combinations */
+    { MLDSA65_RSA3072_PSS_SN,     ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_RSA_PSS,   DEFAULT_RSA_NAME,     3072,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-RSA3072-PSS-SHA512", "SHA-256" },
+
+    { MLDSA65_RSA3072_PKCS15_SN,  ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_RSA_PKCS15, DEFAULT_RSA_NAME,    3072,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-RSA3072-PKCS15-SHA512", "SHA-256" },
+
+    { MLDSA65_RSA4096_PSS_SN,     ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_RSA_PSS,   DEFAULT_RSA_NAME,     4096,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-RSA4096-PSS-SHA512", "SHA-384" },
+
+    { MLDSA65_RSA4096_PKCS15_SN,  ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_RSA_PKCS15, DEFAULT_RSA_NAME,    4096,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-RSA4096-PKCS15-SHA512", "SHA-384" },
+
+    { MLDSA65_P256_SN,            ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_NISTP256_NAME, NID_X9_62_prime256v1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-ECDSA-P256-SHA512", "SHA-256" },
+
+    { MLDSA65_P384_SN,            ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_NISTP384_NAME, NID_secp384r1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-ECDSA-P384-SHA512", "SHA-384" },
+
+    { MLDSA65_BRAINPOOLP256_SN,   ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_BRAINPOOL256_NAME, NID_brainpoolP256r1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-ECDSA-BP256-SHA512", "SHA-256" },
+
+    { MLDSA65_ED25519_SN,         ML_DSA_65, DEFAULT_MLDSA65_NAME,
+      COMP_CLASSIC_ED25519, DEFAULT_ED25519_NAME,   -1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_65_SIG_SZ, ML_DSA_65_PUB_KEY_SZ,
+      "COMPSIG-MLDSA65-Ed25519-SHA512", NULL },
+
+    /* ML-DSA-87 combinations */
+    { MLDSA87_P384_SN,            ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_NISTP384_NAME, NID_secp384r1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-ECDSA-P384-SHA512", "SHA-384" },
+
+    { MLDSA87_BRAINPOOLP384_SN,   ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_BRAINPOOL384_NAME, NID_brainpoolP384r1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-ECDSA-BP384-SHA512", "SHA-384" },
+
+    { MLDSA87_ED448_SN,           ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_ED448, DEFAULT_ED448_NAME,       -1,
+      "SHAKE-256", shake256_oid_der, sizeof(shake256_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-Ed448-SHAKE256", NULL },
+
+    { MLDSA87_RSA3072_PSS_SN,     ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_RSA_PSS,   DEFAULT_RSA_NAME,     3072,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-RSA3072-PSS-SHA512", "SHA-256" },
+
+    { MLDSA87_RSA4096_PSS_SN,     ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_RSA_PSS,   DEFAULT_RSA_NAME,     4096,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-RSA4096-PSS-SHA512", "SHA-384" },
+
+    { MLDSA87_P521_SN,            ML_DSA_87, DEFAULT_MLDSA87_NAME,
+      COMP_CLASSIC_ECDSA, DEFAULT_ECDSA_NISTP521_NAME, NID_secp521r1,
+      "SHA-512", sha512_oid_der,  sizeof(sha512_oid_der),
+      ML_DSA_87_SIG_SZ, ML_DSA_87_PUB_KEY_SZ,
+      "COMPSIG-MLDSA87-ECDSA-P521-SHA512", "SHA-512" },
+};
+
+#define COMPOSITE_ALG_TABLE_SIZE \
+    (sizeof(composite_alg_table) / sizeof(composite_alg_table[0]))
+
+const COMPOSITE_ALG_INFO *composite_alg_info_find(const char *composite_name) {
+    size_t i;
+    if (composite_name == NULL)
+        return NULL;
+    for (i = 0; i < COMPOSITE_ALG_TABLE_SIZE; i++) {
+        if (strcmp(composite_alg_table[i].name, composite_name) == 0)
+            return &composite_alg_table[i];
+    }
+    return NULL;
 }

@@ -1,4 +1,6 @@
 #include "provider.h"
+#include "composite_encoder.h"
+#include "composite_decoder.h"
 
 /* Provider initialization */
 static OSSL_FUNC_provider_gettable_params_fn composite_gettable_params;
@@ -56,6 +58,10 @@ const OSSL_ALGORITHM *composite_query_operation(void *provctx, int operation_id,
         return composite_kem_algorithms(provctx);
     case OSSL_OP_KEYMGMT:
         return composite_keymgmt(provctx);
+    case OSSL_OP_ENCODER:
+        return composite_encoders(provctx);
+    case OSSL_OP_DECODER:
+        return composite_decoders(provctx);
     }
 
     return NULL;
@@ -85,30 +91,21 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
                        const OSSL_DISPATCH **out,
                        void **provctx) {
 
-    fprintf(stderr, "Sanity Check\n");
-
     COMPOSITE_CTX *ctx;
         // Composite provider context
 
     int rc = 0;
         // Return code
 
-    (void)in; /* Unused */
-
-    // TODO: Initialize OQS-related components
-    // =======================================
-    // if (!oqs_patch_codepoints())
-    //     goto end_init;
-
-    // if (!oqs_patch_oids())
-    //     goto end_init;
+    /* Register composite algorithm OIDs in the global OBJ database */
+    composite_register_oids();
 
     ctx = OPENSSL_malloc(sizeof(*ctx));
     if (ctx == NULL)
         return 0;
 
     ctx->core_handle = core;
-    ctx->libctx = OSSL_LIB_CTX_new();
+    ctx->libctx = OSSL_LIB_CTX_new_from_dispatch(core, in);
     if (ctx->libctx == NULL) {
         free(ctx);
         return 0;

@@ -66,7 +66,7 @@ BEGIN_C_DECLS
  * Note: PRIV_KEY_SZ represents the seed size (ξ), not the full expanded private key.
  * Full private key would be 4896 bytes.
  */
-#define ML_DSA_87_PUB_KEY_SZ  2420
+#define ML_DSA_87_PUB_KEY_SZ  2592
 #define ML_DSA_87_PRIV_KEY_SZ 32
 #define ML_DSA_87_SIG_SZ      4627
 
@@ -104,7 +104,40 @@ typedef struct composite_key_st {
     void *classic_privkey;
     void *classic_pubkey;
 
+    // 1 if private key material is present, 0 if public only
+    int has_private;
+
 } COMPOSITE_KEY;
+
+// ========================================
+// Algorithm Information Table
+// ========================================
+
+typedef enum {
+    COMP_CLASSIC_RSA_PSS,
+    COMP_CLASSIC_RSA_PKCS15,
+    COMP_CLASSIC_ECDSA,
+    COMP_CLASSIC_ED25519,
+    COMP_CLASSIC_ED448
+} COMP_CLASSIC_TYPE;
+
+typedef struct {
+    const char *name;               /* SN, e.g. "id-MLDSA44-RSA2048-PSS-SHA256" */
+    int mldsa_id;                   /* ML_DSA_44, ML_DSA_65, or ML_DSA_87 */
+    const char *mldsa_name;         /* "ML-DSA-44", "ML-DSA-65", "ML-DSA-87" */
+    COMP_CLASSIC_TYPE classic_type;
+    const char *classic_alg;        /* key generation alg name */
+    int classic_param;              /* RSA bits, EC NID from classic_id_from_algorithm, or -1 */
+    const char *prehash_alg;        /* "SHA-256", "SHA-512", or "SHAKE-256" */
+    const unsigned char *hash_oid_der;  /* DER encoding of hash OID */
+    size_t hash_oid_der_len;
+    size_t mldsa_sig_len;           /* ML-DSA signature length */
+    size_t mldsa_pub_len;           /* ML-DSA public key length */
+    const char *label;              /* per-algorithm domain separation label */
+    const char *trad_hash_alg;      /* hash used by the classic signer (may differ from prehash_alg) */
+} COMPOSITE_ALG_INFO;
+
+const COMPOSITE_ALG_INFO *composite_alg_info_find(const char *composite_name);
 
 // ====================
 // Functions Prototypes
@@ -176,6 +209,10 @@ int composite_signkey_set0_components(COMPOSITE_KEY * key,
                                       EVP_PKEY      * ml_dsa_key,
                                       EVP_PKEY      * trad_key);
 
+/* Key generation helpers - used by composite_keys.c */
+EVP_PKEY *ml_dsa_key_generate(COMPOSITE_CTX *composite_ctx, const char *algorithm);
+EVP_PKEY *classic_key_generate(COMPOSITE_CTX *composite_ctx, const char *algorithm,
+                                int curve_or_keysize);
 
 END_C_DECLS
 
