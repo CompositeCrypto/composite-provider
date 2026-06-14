@@ -6,6 +6,8 @@
 #include <openssl/types.h>
 #include <openssl/core_names.h>
 #include <openssl/evp.h>
+#include "composite_kem_key.h"
+#include "test_helpers.h"
 
 /*
  * Test program for the Composite Provider
@@ -92,6 +94,21 @@ end:
 static int test_provider_algorithms(void)
 {
     OSSL_PROVIDER *prov = NULL;
+    const char *kem_algorithms[] = {
+        MLKEM768_RSA2048_SN,
+        MLKEM768_RSA3072_SN,
+        MLKEM768_RSA4096_SN,
+        MLKEM768_X25519_SN,
+        MLKEM768_P256_SN,
+        MLKEM768_P384_SN,
+        MLKEM768_BRAINPOOLP256_SN,
+        MLKEM1024_RSA3072_SN,
+        MLKEM1024_P384_SN,
+        MLKEM1024_BRAINPOOLP384_SN,
+        MLKEM1024_X448_SN,
+        MLKEM1024_P521_SN,
+    };
+    size_t i;
     int ret = 0;
 
     printf("\nTest 3: Checking algorithm availability...\n");
@@ -108,21 +125,6 @@ static int test_provider_algorithms(void)
         return 0;
     }
 
-    /* Check that composite kem keys can be generated correctly */
-
-    printf("Test 4: Checking composite kem key generation...\n");
-
-    EVP_KEM * mlkem768_ecdhP384 = EVP_KEM_fetch(NULL, "MLKEM768-ECDH-P384-SHA3-256", "provider=composite");
-    if (mlkem768_ecdhP384 == NULL) {
-        printf("FAILED: Could not fetch ML-KEM-768-ECDH-P384\n");
-        return 0;
-    }
-    printf("Fetched EVP_KEM: %s Provider: %s\n",
-        EVP_KEM_get0_name(mlkem768_ecdhP384),
-        OSSL_PROVIDER_get0_name(EVP_KEM_get0_provider(mlkem768_ecdhP384)));
-    
-    EVP_KEM_free(mlkem768_ecdhP384);
-    
     /*
      * Note: Actual algorithm queries would require more complex testing
      * with EVP_SIGNATURE and EVP_KEM APIs. This test just verifies that
@@ -137,14 +139,35 @@ static int test_provider_algorithms(void)
     printf("    - ML-DSA-65-ECDSA-P384\n");
     printf("    - ML-DSA-87-RSA4096\n");
     printf("    - ML-DSA-87-ECDSA-P521\n");
-    printf("  Expected ML-KEM composite algorithms:\n");
-    printf("    - ML-KEM-512-ECDH-P256\n");
-    printf("    - ML-KEM-768-ECDH-P384\n");
-    printf("    - ML-KEM-1024-ECDH-P521\n");
+    printf("  Expected ML-KEM composite algorithms:\n"
+           "    -id-MLKEM768-RSA2048-SHA3-256\n"
+           "    -id-MLKEM768-RSA3072-SHA3-256\n"
+           "    -id-MLKEM768-RSA4096-SHA3-256\n"
+           "    -id-MLKEM768-X25519-SHA3-256\n"
+           "    -id-MLKEM768-ECDH-P256-SHA3-256\n"
+           "    -id-MLKEM768-ECDH-P384-SHA3-256\n"
+           "    -id-MLKEM768-ECDH-brainpoolP256r1-SHA3-256\n"
+           "    -id-MLKEM1024-RSA3072-SHA3-256\n"
+           "    -id-MLKEM1024-ECDH-P384-SHA3-256\n"
+           "    -id-MLKEM1024-ECDH-brainpoolP384r1-SHA3-256\n"
+           "    -id-MLKEM1024-X448-SHA3-256\n"
+           "    -id-MLKEM1024-ECDH-P521-SHA3-256\n");
+
+    /* Check that the algorithms above can be fetched correctly */
+
+    printf("Test 4: Testing Algorithm Registration...\n");
+
+    for (i = 0; i < sizeof(kem_algorithms) / sizeof(kem_algorithms[0]); i++) {
+        if (!composite_kem_algorithm_fetchable(NULL, kem_algorithms[i],
+                                               "provider=composite"))
+            goto end;
+    }
+
     printf("  PASSED: Algorithm registration check complete\n");
 
     ret = 1;
 
+end:
     if (prov != NULL) {
         OSSL_PROVIDER_unload(prov);
     }

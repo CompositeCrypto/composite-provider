@@ -162,46 +162,15 @@ static const OSSL_PARAM *composite_kem_gettable_ctx_params(ossl_unused void *vct
     return known_gettable_ctx_params;
 }
 
-KEM_DISPATCH_TABLE(mlkem512, ecdh_p256)
-
-// /* Dispatch tables for each composite KEM algorithm */
-// /* Note: All algorithms currently use the same implementation functions */
-// const OSSL_DISPATCH composite_mlkem512_ecdh_p256_kem_functions[] = {
-//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-//     { 0, NULL }
-// };
-
+KEM_DISPATCH_TABLE(mlkem768, rsa2048)
+KEM_DISPATCH_TABLE(mlkem768, rsa3072)
+KEM_DISPATCH_TABLE(mlkem768, rsa4096)
+KEM_DISPATCH_TABLE(mlkem768, x25519)
+KEM_DISPATCH_TABLE(mlkem768, ecdh_p256)
 KEM_DISPATCH_TABLE(mlkem768, ecdh_p384)
-
-// const OSSL_DISPATCH composite_mlkem768_ecdh_p384_kem_functions[] = {
-//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-//     { 0, NULL }
-// };
-
+KEM_DISPATCH_TABLE(mlkem768, ecdh_brainpool256r1)
+KEM_DISPATCH_TABLE(mlkem1024, rsa3072)
+KEM_DISPATCH_TABLE(mlkem1024, ecdh_p384)
+KEM_DISPATCH_TABLE(mlkem1024, ecdh_brainpool384r1)
+KEM_DISPATCH_TABLE(mlkem1024, x448)
 KEM_DISPATCH_TABLE(mlkem1024, ecdh_p521)
-
-// const OSSL_DISPATCH composite_mlkem1024_ecdh_p521_kem_functions[] = {
-//     { OSSL_FUNC_KEM_NEWCTX, (void (*)(void))composite_kem_newctx },
-//     { OSSL_FUNC_KEM_FREECTX, (void (*)(void))composite_kem_freectx },
-//     { OSSL_FUNC_KEM_ENCAPSULATE_INIT, (void (*)(void))composite_kem_encapsulate_init },
-//     { OSSL_FUNC_KEM_ENCAPSULATE, (void (*)(void))composite_kem_encapsulate },
-//     { OSSL_FUNC_KEM_DECAPSULATE_INIT, (void (*)(void))composite_kem_decapsulate_init },
-//     { OSSL_FUNC_KEM_DECAPSULATE, (void (*)(void))composite_kem_decapsulate },
-//     { OSSL_FUNC_KEM_GET_CTX_PARAMS, (void (*)(void))composite_kem_get_ctx_params },
-//     { OSSL_FUNC_KEM_SET_CTX_PARAMS, (void (*)(void))composite_kem_set_ctx_params },
-//     { 0, NULL }
-// };
