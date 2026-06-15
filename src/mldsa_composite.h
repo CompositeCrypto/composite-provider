@@ -3,41 +3,34 @@
 
 #include "compat.h"
 #include "composite_provider.h"
+#include "composite_sig.h"
 
 #include <openssl/core_names.h>
 
-/*
- * ML-DSA Composite Signature Algorithms
- * 
- * This file implements the algorithm dispatch for ML-DSA composite signatures.
- * Each composite algorithm combines ML-DSA (Dilithium) with a traditional algorithm.
- *
- * Supported combinations:
- * - ML-DSA-44 + RSA-2048
- * - ML-DSA-44 + ECDSA-P256
- * - ML-DSA-65 + RSA-3072
- * - ML-DSA-65 + ECDSA-P384
- * - ML-DSA-87 + RSA-4096
- * - ML-DSA-87 + ECDSA-P521
- */
-
 BEGIN_C_DECLS
 
-                    // ====================
-                    // Signature operations
-                    // ====================
-
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa44, rsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa44, ecdsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa44, ed25519)
-
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa65, rsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa65, ecdsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa65, ed25519)
-
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa87, rsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa87, ecdsa)
-EXTERN_DECLARE_SIG_DISPATCH_TABLE(mldsa87, ed448)
+/* Per-variant signature dispatch tables (defined in mldsa_composite.c) */
+/* ML-DSA-44 */
+extern const OSSL_DISPATCH composite_mldsa44_rsa2048_pss_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa44_rsa2048_pkcs15_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa44_ed25519_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa44_p256_signature_functions[];
+/* ML-DSA-65 */
+extern const OSSL_DISPATCH composite_mldsa65_rsa3072_pss_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_rsa3072_pkcs15_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_rsa4096_pss_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_rsa4096_pkcs15_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_p256_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_p384_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_brainpoolp256_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa65_ed25519_signature_functions[];
+/* ML-DSA-87 */
+extern const OSSL_DISPATCH composite_mldsa87_p384_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa87_brainpoolp384_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa87_ed448_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa87_rsa3072_pss_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa87_rsa4096_pss_signature_functions[];
+extern const OSSL_DISPATCH composite_mldsa87_p521_signature_functions[];
 
 END_C_DECLS
 
