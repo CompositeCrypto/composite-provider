@@ -161,12 +161,11 @@ report to `scripts/output.txt`.
    ```
    scripts/
    └── providers/
-       ├── bc/
+       ├── provider_name1/
        │   └── artifacts_certs_r5.zip
-       ├── corey/
+       ├── provider_name2/
        │   └── artifacts_certs_r5.zip
-       └── <other_provider>/
-           └── artifacts_certs_r5.zip
+       └── ...
    ```
 
    The expected layout mirrors `pqc-certificates/providers/<name>/artifacts_certs_r5.zip`.
