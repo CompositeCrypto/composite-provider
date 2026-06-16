@@ -1,4 +1,4 @@
-# scripts/
+# scripts
 
 Helper scripts for building, testing, and interoperability verification of the
 composite provider.
