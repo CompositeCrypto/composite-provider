@@ -133,7 +133,7 @@ directory must contain files named `*<oid>_ta.der` and `*<oid>_priv.der`.
 
 ---
 
-## run_all_providers.sh
+## test_all_providers.sh
 
 Iterates over every provider directory found under `scripts/providers/`, extracts
 its `artifacts_certs_r5.zip`, runs `check_composite_r5.sh` against the composite
@@ -143,8 +143,8 @@ report to `scripts/output.txt`.
 **Usage**
 
 ```bash
-./scripts/run_all_providers.sh             # verify all providers, no CSV output
-./scripts/run_all_providers.sh --compat    # also generate compatibility matrix CSVs
+./scripts/test_all_providers.sh             # verify all providers, no CSV output
+./scripts/test_all_providers.sh --compat    # also generate compatibility matrix CSVs
 ```
 
 **Required preparation**
