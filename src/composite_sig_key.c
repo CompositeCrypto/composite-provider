@@ -45,6 +45,9 @@ COMPOSITE_KEY * composite_signkey_new(void) {
     key->classic_privkey = NULL;
     key->classic_pubkey = NULL;
 
+    // No private key material present
+    key->has_private = 0;
+
     // Success
     return key;
 }

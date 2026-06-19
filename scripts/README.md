@@ -1,4 +1,4 @@
-# scripts/
+# scripts
 
 Helper scripts for building, testing, and interoperability verification of the
 composite provider.
@@ -133,7 +133,7 @@ directory must contain files named `*<oid>_ta.der` and `*<oid>_priv.der`.
 
 ---
 
-## run_all_providers.sh
+## test_all_providers.sh
 
 Iterates over every provider directory found under `scripts/providers/`, extracts
 its `artifacts_certs_r5.zip`, runs `check_composite_r5.sh` against the composite
@@ -143,8 +143,8 @@ report to `scripts/output.txt`.
 **Usage**
 
 ```bash
-./scripts/run_all_providers.sh             # verify all providers, no CSV output
-./scripts/run_all_providers.sh --compat    # also generate compatibility matrix CSVs
+./scripts/test_all_providers.sh             # verify all providers, no CSV output
+./scripts/test_all_providers.sh --compat    # also generate compatibility matrix CSVs
 ```
 
 **Required preparation**
@@ -161,12 +161,11 @@ report to `scripts/output.txt`.
    ```
    scripts/
    └── providers/
-       ├── bc/
+       ├── provider_name1/
        │   └── artifacts_certs_r5.zip
-       ├── corey/
+       ├── provider_name2/
        │   └── artifacts_certs_r5.zip
-       └── <other_provider>/
-           └── artifacts_certs_r5.zip
+       └── ...
    ```
 
    The expected layout mirrors `pqc-certificates/providers/<name>/artifacts_certs_r5.zip`.

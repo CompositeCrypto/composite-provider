@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run_all_providers.sh
+# test_all_providers.sh
 #
 # Discovers artifacts_certs_r5.zip under:
 #   .vscode/internal_scripts/providers/<name_of_provider>/
@@ -10,7 +10,7 @@
 # per provider in the output.
 #
 # Usage:
-#   ./run_all_providers.sh
+#   ./test_all_providers.sh
 #
 # Environment variables (all optional, passed through to check_composite_r5.sh):
 #   OPENSSL_DIR   - OpenSSL source/build directory (default: workspace root)
