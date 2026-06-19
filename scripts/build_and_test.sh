@@ -31,6 +31,14 @@ cd "$ROOT"
 : "${CMAKE_PARAMS:=}"
 : "${OSSL_CONFIG:=}"
 
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    SHLIB_EXT="dylib"
+    LIBCRYPTO_GLOB="libcrypto*.dylib"
+else
+    SHLIB_EXT="so"
+    LIBCRYPTO_GLOB="libcrypto.so*"
+fi
+
 # ── OpenSSL ───────────────────────────────────────────────────────────────────
 OSSL_DIR="$ROOT/openssl"
 OSSL_BIN="$OSSL_DIR/apps/openssl"
@@ -55,15 +63,15 @@ fi
 
 # Resolve the actual shared-library path for LD_LIBRARY_PATH
 OSSL_LIB_DIR="$OSSL_DIR"
-if [[ -z "$(ls "$OSSL_LIB_DIR"/libcrypto.so* 2>/dev/null)" ]]; then
-    echo "[error] Cannot find libcrypto.so* under $OSSL_LIB_DIR" >&2
+if [[ -z "$(find "$OSSL_LIB_DIR" -maxdepth 1 -name "$LIBCRYPTO_GLOB" -print -quit)" ]]; then
+    echo "[error] Cannot find $LIBCRYPTO_GLOB under $OSSL_LIB_DIR" >&2
     exit 1
 fi
 
 # ── Provider ──────────────────────────────────────────────────────────────────
 BUILD_DIR="$ROOT/_build"
 
-if [[ ! -f "$BUILD_DIR/composite.so" ]]; then
+if [[ ! -f "$BUILD_DIR/composite.$SHLIB_EXT" ]]; then
     echo "[build] Configuring composite provider …"
     cmake $CMAKE_PARAMS \
         -DOPENSSL_ROOT_DIR="$OSSL_DIR" \
@@ -73,7 +81,7 @@ if [[ ! -f "$BUILD_DIR/composite.so" ]]; then
     echo "[build] Building composite provider …"
     make $MAKE_PARAMS -C "$BUILD_DIR"
 else
-    echo "[build] composite.so already built — skipping provider build."
+    echo "[build] composite.$SHLIB_EXT already built — skipping provider build."
     echo "        (Run with -f to force a rebuild.)"
 fi
 

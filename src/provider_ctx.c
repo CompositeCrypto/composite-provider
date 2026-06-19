@@ -23,6 +23,6 @@ COMPOSITE_CTX *COMPOSITE_PROVIDER_CTX_new(const OSSL_CORE_HANDLE *core_handle, O
 void COMPOSITE_PROVIDER_CTX_free(COMPOSITE_CTX *ctx) {
     if (ctx) {
         OSSL_LIB_CTX_free(ctx->libctx);
-        free(ctx);
+        OPENSSL_free(ctx);
     }
 }

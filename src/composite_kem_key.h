@@ -86,6 +86,8 @@ typedef struct composite_kemkey_st {
     void *classic_privkey;
     void *classic_pubkey;
 
+    int has_private;
+
 } COMPOSITE_KEM_KEY;
 
 // ====================

@@ -1,7 +1,10 @@
 /* composite_keymgmt.c — per-algorithm keymgmt dispatch tables */
 
 #include "composite_keymgmt.h"
+#include "composite_kem_keymgmt.h"
 #include "composite_sig_key.h"
+
+#define KEM_NAMES(ln, sn, oid) ln ":" sn ":" oid
 
 /* -------------------------------------------------------------------------
  * Per-algorithm dispatch tables (18 algorithms)
@@ -116,6 +119,32 @@ const OSSL_ALGORITHM *composite_keymgmt(void *provctx)
         { PROV_NAMES_MLDSA87_P521,           "provider=composite",
           ossl_composite_mldsa87_p521_keymgmt_functions,
           "Composite ML-DSA-87 with ECDSA-P521-SHA512" },
+
+        /* ML-KEM */
+        { KEM_NAMES(MLKEM768_RSA2048_LN, MLKEM768_RSA2048_SN, MLKEM768_RSA2048_OID),
+          "provider=composite", mlkem768_rsa2048_functions, NULL },
+        { KEM_NAMES(MLKEM768_RSA3072_LN, MLKEM768_RSA3072_SN, MLKEM768_RSA3072_OID),
+          "provider=composite", mlkem768_rsa3072_functions, NULL },
+        { KEM_NAMES(MLKEM768_RSA4096_LN, MLKEM768_RSA4096_SN, MLKEM768_RSA4096_OID),
+          "provider=composite", mlkem768_rsa4096_functions, NULL },
+        { KEM_NAMES(MLKEM768_X25519_LN, MLKEM768_X25519_SN, MLKEM768_X25519_OID),
+          "provider=composite", mlkem768_x25519_functions, NULL },
+        { KEM_NAMES(MLKEM768_P256_LN, MLKEM768_P256_SN, MLKEM768_P256_OID),
+          "provider=composite", mlkem768_p256_functions, NULL },
+        { KEM_NAMES(MLKEM768_P384_LN, MLKEM768_P384_SN, MLKEM768_P384_OID),
+          "provider=composite", mlkem768_p384_functions, NULL },
+        { KEM_NAMES(MLKEM768_BRAINPOOLP256_LN, MLKEM768_BRAINPOOLP256_SN, MLKEM768_BRAINPOOLP256_OID),
+          "provider=composite", mlkem768_brainpoolp256_functions, NULL },
+        { KEM_NAMES(MLKEM1024_RSA3072_LN, MLKEM1024_RSA3072_SN, MLKEM1024_RSA3072_OID),
+          "provider=composite", mlkem1024_rsa3072_functions, NULL },
+        { KEM_NAMES(MLKEM1024_P384_LN, MLKEM1024_P384_SN, MLKEM1024_P384_OID),
+          "provider=composite", mlkem1024_p384_functions, NULL },
+        { KEM_NAMES(MLKEM1024_BRAINPOOLP384_LN, MLKEM1024_BRAINPOOLP384_SN, MLKEM1024_BRAINPOOLP384_OID),
+          "provider=composite", mlkem1024_brainpoolp384_functions, NULL },
+        { KEM_NAMES(MLKEM1024_X448_LN, MLKEM1024_X448_SN, MLKEM1024_X448_OID),
+          "provider=composite", mlkem1024_x448_functions, NULL },
+        { KEM_NAMES(MLKEM1024_P521_LN, MLKEM1024_P521_SN, MLKEM1024_P521_OID),
+          "provider=composite", mlkem1024_p521_functions, NULL },
 
         { NULL, NULL, NULL, NULL }
     };

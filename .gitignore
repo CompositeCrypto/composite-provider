@@ -56,6 +56,10 @@ dkms.conf
 
 # CMake build directory
 build/
+_build/
+cmake-build-debug/
+.idea/
+openssl/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake

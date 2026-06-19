@@ -20,20 +20,30 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 : "${OSSL_LIB_DIR:=$ROOT/openssl}"
 : "${BUILD_DIR:=$ROOT/_build}"
 
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    SHLIB_EXT="dylib"
+    LIBCRYPTO_GLOB="libcrypto*.dylib"
+    LIB_PATH_VAR="DYLD_LIBRARY_PATH"
+else
+    SHLIB_EXT="so"
+    LIBCRYPTO_GLOB="libcrypto.so*"
+    LIB_PATH_VAR="LD_LIBRARY_PATH"
+fi
+
 # Validate prerequisites
-if [[ -z "$(ls "$OSSL_LIB_DIR"/libcrypto.so* 2>/dev/null)" ]]; then
-    echo "[error] libcrypto.so* not found under $OSSL_LIB_DIR" >&2
+if [[ -z "$(find "$OSSL_LIB_DIR" -maxdepth 1 -name "$LIBCRYPTO_GLOB" -print -quit)" ]]; then
+    echo "[error] $LIBCRYPTO_GLOB not found under $OSSL_LIB_DIR" >&2
     echo "        Set OSSL_LIB_DIR or run build_and_test.sh first." >&2
     exit 1
 fi
 
-if [[ ! -f "$BUILD_DIR/composite.so" ]]; then
-    echo "[error] composite.so not found in $BUILD_DIR" >&2
+if [[ ! -f "$BUILD_DIR/composite.$SHLIB_EXT" ]]; then
+    echo "[error] composite.$SHLIB_EXT not found in $BUILD_DIR" >&2
     echo "        Run build_and_test.sh first." >&2
     exit 1
 fi
 
-export LD_LIBRARY_PATH="$OSSL_LIB_DIR"
+export "$LIB_PATH_VAR=$OSSL_LIB_DIR"
 export OPENSSL_MODULES="$BUILD_DIR"
 
 # Default test list (all)
@@ -44,6 +54,8 @@ DEFAULT_TESTS=(
     "test_evp_keygen"
     "test_sign_verify"
     "test_oid_registration"
+    "test_keygen_kem"
+    "test_evp_kem_keygen"
 )
 
 # Allow override via env var (space-separated names)
@@ -68,7 +80,9 @@ for t in "${RUN_TESTS[@]}"; do
     BIN="$BUILD_DIR/tests/$t"
     if [[ ! -x "$BIN" ]]; then
         echo ""
-        echo "[SKIP] $t — binary not found at $BIN"
+        echo "[FAIL] $t — binary not found at $BIN"
+        FAIL=$(( FAIL + 1 ))
+        FAILED_TESTS+=("$t")
         continue
     fi
 

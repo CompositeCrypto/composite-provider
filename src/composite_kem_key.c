@@ -1,201 +1,173 @@
 #include "composite_kem_key.h"
 
+#include <openssl/core_names.h>
+#include <openssl/ec.h>
+#include <openssl/rsa.h>
+#include <string.h>
 
-                    // ===========================
-                    // Static Functions Prototypes
-                    // ===========================
+typedef struct {
+    const char *composite_name;
+    const char *mlkem_name;
+    const char *classic_name;
+    int classic_param;
+} COMPOSITE_KEM_ALG_INFO;
 
-int ml_kem_key_generate(EVP_PKEY_CTX *ctx, const char *algorithm, COMPOSITE_CTX *composite_ctx);
-int classic_kex_key_generate(EVP_PKEY_CTX *ctx, const char *algorithm, COMPOSITE_CTX *composite_ctx);
+static const COMPOSITE_KEM_ALG_INFO kem_algorithms[] = {
+    { MLKEM768_RSA2048_SN, DEFAULT_MLKEM768_NAME, DEFAULT_RSA_NAME, 2048 },
+    { MLKEM768_RSA3072_SN, DEFAULT_MLKEM768_NAME, DEFAULT_RSA_NAME, 3072 },
+    { MLKEM768_RSA4096_SN, DEFAULT_MLKEM768_NAME, DEFAULT_RSA_NAME, 4096 },
+    { MLKEM768_X25519_SN, DEFAULT_MLKEM768_NAME, "X25519", 0 },
+    { MLKEM768_P256_SN, DEFAULT_MLKEM768_NAME, "EC", NID_X9_62_prime256v1 },
+    { MLKEM768_P384_SN, DEFAULT_MLKEM768_NAME, "EC", NID_secp384r1 },
+    { MLKEM768_BRAINPOOLP256_SN, DEFAULT_MLKEM768_NAME, "EC", NID_brainpoolP256r1 },
+    { MLKEM1024_RSA3072_SN, DEFAULT_MLKEM1024_NAME, DEFAULT_RSA_NAME, 3072 },
+    { MLKEM1024_P384_SN, DEFAULT_MLKEM1024_NAME, "EC", NID_secp384r1 },
+    { MLKEM1024_BRAINPOOLP384_SN, DEFAULT_MLKEM1024_NAME, "EC", NID_brainpoolP384r1 },
+    { MLKEM1024_X448_SN, DEFAULT_MLKEM1024_NAME, "X448", 0 },
+    { MLKEM1024_P521_SN, DEFAULT_MLKEM1024_NAME, "EC", NID_secp521r1 },
+};
 
-                    // ================
-                    // Public Functions
-                    // ================
+static const COMPOSITE_KEM_ALG_INFO *composite_kem_alg_info_find(
+        const char *composite_name)
+{
+    size_t i;
 
-COMPOSITE_KEM_KEY * composite_kemkey_new(void) {
+    if (composite_name == NULL)
+        return NULL;
 
-    COMPOSITE_KEM_KEY *key = NULL;
+    for (i = 0; i < sizeof(kem_algorithms) / sizeof(kem_algorithms[0]); i++) {
+        if (strcmp(kem_algorithms[i].composite_name, composite_name) == 0)
+            return &kem_algorithms[i];
+    }
+    return NULL;
+}
 
-    key = (COMPOSITE_KEM_KEY *)OPENSSL_malloc(sizeof(COMPOSITE_KEM_KEY));
+static EVP_PKEY *generate_key(COMPOSITE_CTX *ctx, const char *algorithm,
+                              int parameter)
+{
+    EVP_PKEY_CTX *pctx = NULL;
+    EVP_PKEY *pkey = NULL;
+
+    pctx = EVP_PKEY_CTX_new_from_name(ctx->libctx, algorithm, NULL);
+    if (pctx == NULL || EVP_PKEY_keygen_init(pctx) <= 0)
+        goto done;
+
+    if (strcmp(algorithm, DEFAULT_RSA_NAME) == 0) {
+        if (EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, parameter) <= 0)
+            goto done;
+    } else if (strcmp(algorithm, "EC") == 0) {
+        if (EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, parameter) <= 0)
+            goto done;
+    }
+
+    if (EVP_PKEY_generate(pctx, &pkey) <= 0) {
+        EVP_PKEY_free(pkey);
+        pkey = NULL;
+    }
+
+done:
+    EVP_PKEY_CTX_free(pctx);
+    return pkey;
+}
+
+COMPOSITE_KEM_KEY *composite_kemkey_new(void)
+{
+    COMPOSITE_KEM_KEY *key = OPENSSL_malloc(sizeof(*key));
+
     if (key == NULL) {
         ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
 
-    key->provctx = NULL;
-
-    // Composite key information
-    key->nid = 0;
-    key->composite_name = NULL;
-    key->composite_tls_name = NULL;
-
-    // ML-KEM component and context
-    key->mlkem_name = NULL;
-    key->ml_kem_ctx = NULL;
-    key->mlkem_privkey = NULL;
-    key->mlkem_pubkey = NULL;
-
-    // Classic Algorithm component and context
-    key->classic_algorithm_name = NULL;
-    key->classic_ctx = NULL;
-    key->classic_privkey = NULL;
-    key->classic_pubkey = NULL;
-
-    // Success
+    memset(key, 0, sizeof(*key));
     return key;
 }
 
-int composite_kemkey_generate(COMPOSITE_KEM_KEY * key,
-                              const char    * const algorithm,
-                              COMPOSITE_CTX * ctx) {
+int composite_kemkey_generate(COMPOSITE_KEM_KEY *key,
+                              const char *algorithm,
+                              COMPOSITE_CTX *ctx)
+{
+    const COMPOSITE_KEM_ALG_INFO *alg;
+    EVP_PKEY *mlkem_key = NULL;
+    EVP_PKEY *classic_key = NULL;
 
-    if (key == NULL || algorithm == NULL || ctx == NULL) {
+    if (key == NULL || algorithm == NULL || ctx == NULL || ctx->libctx == NULL) {
         ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
-    // Generate key material for ML-KEM component
-    if (!ml_kem_key_generate(key->ml_kem_ctx, algorithm, ctx)) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
+    alg = composite_kem_alg_info_find(algorithm);
+    if (alg == NULL) {
+        ERR_raise(ERR_LIB_PROV, ERR_R_UNSUPPORTED);
         return 0;
     }
 
-    // Generate key material for classic component
-    if (!classic_kex_key_generate(key->classic_ctx, algorithm, ctx)) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-        return 0;
-    }
+    mlkem_key = generate_key(ctx, alg->mlkem_name, 0);
+    if (mlkem_key == NULL)
+        goto err;
 
-    if (!composite_kemkey_set0_components(key,
-                                          key->mlkem_key,
-                                          key->classic_key)) {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-        return 0;
-    }
+    classic_key = generate_key(ctx, alg->classic_name, alg->classic_param);
+    if (classic_key == NULL)
+        goto err;
 
+    EVP_PKEY_free((EVP_PKEY *)key->mlkem_pubkey);
+    EVP_PKEY_free((EVP_PKEY *)key->classic_pubkey);
+    key->provctx = ctx;
+    key->composite_name = alg->composite_name;
+    key->mlkem_name = alg->mlkem_name;
+    key->classic_algorithm_name = alg->classic_name;
+    key->mlkem_pubkey = mlkem_key;
+    key->classic_pubkey = classic_key;
+    key->has_private = 1;
     return 1;
+
+err:
+    EVP_PKEY_free(mlkem_key);
+    EVP_PKEY_free(classic_key);
+    return 0;
 }
 
-
-void composite_kemkey_free(COMPOSITE_KEM_KEY * key) {
-    if (key == NULL) {
+void composite_kemkey_free(COMPOSITE_KEM_KEY *key)
+{
+    if (key == NULL)
         return;
-    }
 
-    // Free ML-KEM component
-    if (key->ml_kem_ctx != NULL) {
-        EVP_PKEY_CTX_free(key->ml_kem_ctx);
-    }
-    if (key->mlkem_privkey != NULL) {
-        EVP_PKEY_free(key->mlkem_privkey);
-    }
-    if (key->mlkem_pubkey != NULL) {
-        EVP_PKEY_free(key->mlkem_pubkey);
-    }
-
-    // Free classic component
-    if (key->classic_ctx != NULL) {
-        EVP_PKEY_CTX_free(key->classic_ctx);
-    }
-    if (key->classic_privkey != NULL) {
-        EVP_PKEY_free(key->classic_privkey);
-    }
-    if (key->classic_pubkey != NULL) {
-        EVP_PKEY_free(key->classic_pubkey);
-    }
-
-    // Free the key structure itself
+    EVP_PKEY_CTX_free(key->ml_kem_ctx);
+    EVP_PKEY_CTX_free(key->classic_ctx);
+    EVP_PKEY_free((EVP_PKEY *)key->mlkem_privkey);
+    EVP_PKEY_free((EVP_PKEY *)key->mlkem_pubkey);
+    EVP_PKEY_free((EVP_PKEY *)key->classic_privkey);
+    EVP_PKEY_free((EVP_PKEY *)key->classic_pubkey);
     OPENSSL_free(key);
 }
 
-int composite_kemkey_get0_components(const COMPOSITE_KEM_KEY  * const key, 
-                                     EVP_PKEY                ** const ml_kem_key,
-                                     EVP_PKEY                ** const trad_key) {
+int composite_kemkey_get0_components(const COMPOSITE_KEM_KEY *key,
+                                     EVP_PKEY **ml_kem_key,
+                                     EVP_PKEY **trad_key)
+{
     if (key == NULL || ml_kem_key == NULL || trad_key == NULL) {
         ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
-    *ml_kem_key = key->mlkem_pubkey;
-    *trad_key = key->classic_pubkey;
-
+    *ml_kem_key = (EVP_PKEY *)key->mlkem_pubkey;
+    *trad_key = (EVP_PKEY *)key->classic_pubkey;
     return 1;
 }
 
-
-int composite_kemkey_set0_components(COMPOSITE_KEM_KEY * key, 
-                                     EVP_PKEY          * ml_kem_key,
-                                     EVP_PKEY          * trad_key) {
-
+int composite_kemkey_set0_components(COMPOSITE_KEM_KEY *key,
+                                     EVP_PKEY *ml_kem_key,
+                                     EVP_PKEY *trad_key)
+{
     if (key == NULL || ml_kem_key == NULL || trad_key == NULL) {
         ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
+    EVP_PKEY_free((EVP_PKEY *)key->mlkem_pubkey);
+    EVP_PKEY_free((EVP_PKEY *)key->classic_pubkey);
     key->mlkem_pubkey = ml_kem_key;
     key->classic_pubkey = trad_key;
-
-    return 1;
-}
-
-                    // ================================
-                    // Static Functions Implementations
-                    // ================================
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-int ml_kem_key_generate(EVP_PKEY_CTX  * ctx,
-                        const char    * algorithm, 
-                        COMPOSITE_CTX * composite_ctx) {
-
-    EVP_PKEY *pkey = NULL;
-
-    /* Set context for key generation*/
-    ctx = EVP_PKEY_CTX_new_from_name(composite_ctx->libctx, algorithm, NULL);
-    if (ctx == NULL) {
-        return 0;
-    }
-
-    /* Initialize key generation */
-    if (EVP_PKEY_keygen_init(ctx) <= 0) {
-        return 0;
-    }
-
-    if (EVP_PKEY_keygen(ctx, &pkey) <= 0){
-        return 0;
-    }
-
-    EVP_PKEY_free(pkey);
-
-    return 1;
-}
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-int classic_kex_key_generate(EVP_PKEY_CTX  * ctx, 
-                             const char    * algorithm, 
-                             COMPOSITE_CTX * composite_ctx) {
-
-    EVP_PKEY *pkey = NULL;
-
-    /* Set context for key generation*/
-    ctx = EVP_PKEY_CTX_new_from_name(composite_ctx->libctx, algorithm, NULL);
-    if (ctx == NULL) {
-        return 0;
-    }
-
-    /* Initialize key generation */
-    if (EVP_PKEY_keygen_init(ctx) <= 0) {
-        return 0;
-    }
-
-    if (EVP_PKEY_keygen(ctx, &pkey) <= 0){
-        return 0;
-    }
-
-    EVP_PKEY *ctx_pkey = EVP_PKEY_CTX_get0_pkey(ctx);
-
-    COMPOSITE_DEBUG2("ctx key:  %p, pkey: %p", (void *)ctx_pkey, (void *)pkey);
-
-    EVP_PKEY_free(pkey);
-
+    key->has_private = 1;
     return 1;
 }

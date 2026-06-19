@@ -10,6 +10,7 @@ find_package(OpenSSL 3.0 REQUIRED)
 # Include directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
     ${OPENSSL_INCLUDE_DIR}
 )
 
@@ -21,9 +22,10 @@ set(PROVIDER_SOURCES
     src/composite_sig_key.c
     src/composite_sig_encoding.c
     src/composite_encoder.c
-    src/composite_kem.c
+    src/composite_kem_key.c
+    src/composite_kem_keymgmt.c
+    src/composite_kem_encoding.c
     src/mldsa_composite.c
-    src/mlkem_composite.c
     src/composite_keys.c
     src/composite_keymgmt.c
     src/composite_decoder.c
@@ -37,8 +39,16 @@ target_link_libraries(composite ${OPENSSL_CRYPTO_LIBRARY})
 set_target_properties(composite PROPERTIES
     PREFIX ""
     OUTPUT_NAME "composite"
-    SUFFIX ".so"
 )
+if(APPLE)
+    set_target_properties(composite PROPERTIES
+        SUFFIX ".dylib"
+    )
+else()
+    set_target_properties(composite PROPERTIES
+        SUFFIX ".so"
+    )
+endif()
 
 # Installation
 install(TARGETS composite DESTINATION lib)

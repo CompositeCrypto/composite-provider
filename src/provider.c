@@ -54,8 +54,6 @@ const OSSL_ALGORITHM *composite_query_operation(void *provctx, int operation_id,
     switch (operation_id) {
     case OSSL_OP_SIGNATURE:
         return composite_signature_algorithms(provctx);
-    case OSSL_OP_KEM:
-        return composite_kem_algorithms(provctx);
     case OSSL_OP_KEYMGMT:
         return composite_keymgmt(provctx);
     case OSSL_OP_ENCODER:
@@ -73,7 +71,7 @@ static void composite_teardown(void *provctx)
     
     if (ctx != NULL) {
         OSSL_LIB_CTX_free(ctx->libctx);
-        free(ctx);
+        OPENSSL_free(ctx);
     }
 }
 
@@ -100,14 +98,14 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
     /* Register composite algorithm OIDs in the global OBJ database */
     composite_register_oids();
 
-    ctx = OPENSSL_malloc(sizeof(*ctx));
+    ctx = OPENSSL_zalloc(sizeof(*ctx));
     if (ctx == NULL)
         return 0;
 
     ctx->core_handle = core;
     ctx->libctx = OSSL_LIB_CTX_new_from_dispatch(core, in);
     if (ctx->libctx == NULL) {
-        free(ctx);
+        OPENSSL_free(ctx);
         return 0;
     }
 
@@ -136,7 +134,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *core,
             if (ctx->libctx) { 
                 OSSL_LIB_CTX_free(ctx->libctx);
             }
-            free(ctx);
+            OPENSSL_free(ctx);
         }
         
         if (provctx && *provctx) {
