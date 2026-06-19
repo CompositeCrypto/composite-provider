@@ -65,8 +65,6 @@ CMakeFiles/
 cmake_install.cmake
 Makefile.cmake
 install_manifest.txt
-/Makefile
-/tests/Makefile
 
 # Test executables
 tests/test_provider
