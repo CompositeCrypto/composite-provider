@@ -35,6 +35,15 @@ add_executable(test_evp_keygen
 target_link_libraries(test_evp_keygen ${OPENSSL_CRYPTO_LIBRARY})
 add_test(NAME test_evp_keygen COMMAND test_evp_keygen)
 
+add_executable(test_evp_ecdsa_keygen test_evp_ecdsa_keygen.c)
+target_include_directories(test_evp_ecdsa_keygen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(test_evp_ecdsa_keygen ${OPENSSL_CRYPTO_LIBRARY})
+add_dependencies(test_evp_ecdsa_keygen composite)
+add_test(NAME test_evp_ecdsa_keygen COMMAND test_evp_ecdsa_keygen)
+set_tests_properties(test_evp_ecdsa_keygen PROPERTIES
+    ENVIRONMENT "OPENSSL_MODULES=$<TARGET_FILE_DIR:composite>"
+)
+
 add_executable(test_sign_verify
     test_sign_verify.c
     ${PROVIDER_SIGNATURE}/composite_sig.c

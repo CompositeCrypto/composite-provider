@@ -524,8 +524,10 @@ EVP_PKEY * classic_key_generate(COMPOSITE_CTX * composite_ctx,
             if (!EVP_PKEY_generate(ctx, &pkey)) {
                 ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
                 if (pkey) EVP_PKEY_free(pkey);
+                EVP_PKEY_CTX_free(ctx);
                 return NULL;
             }
+            EVP_PKEY_CTX_free(ctx);
         } break;
 
         case NID_ED25519: {
