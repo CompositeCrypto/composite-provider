@@ -9,6 +9,15 @@ target_include_directories(test_provider PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc
 target_link_libraries(test_provider ${OPENSSL_CRYPTO_LIBRARY})
 add_test(NAME provider_test COMMAND test_provider)
 
+add_executable(test_sig_pkcs8 test_sig_pkcs8.c)
+target_include_directories(test_sig_pkcs8 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(test_sig_pkcs8 ${OPENSSL_CRYPTO_LIBRARY})
+add_dependencies(test_sig_pkcs8 composite)
+add_test(NAME test_sig_pkcs8 COMMAND test_sig_pkcs8)
+set_tests_properties(test_sig_pkcs8 PROPERTIES
+    ENVIRONMENT "OPENSSL_MODULES=$<TARGET_FILE_DIR:composite>"
+)
+
 add_executable(test_encoding
     test_encoding.c
     ${PROVIDER_SIGNATURE}/composite_sig_encoding.c

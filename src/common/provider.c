@@ -14,7 +14,7 @@
  * static const arrays that ignore provctx, so the merge does not depend on
  * which provider instance triggers it.
  *
- * Capacity: 24 KEM + 36 signature decoders, 48 KEM + 54 signature encoders,
+ * Capacity: 24 KEM + 36 signature decoders, 48 KEM + 72 signature encoders,
  * plus a terminator.  merge_algorithm_lists() stops early (leaving the list
  * terminated) rather than overrun if an addition outgrows this — bump the
  * size when adding algorithms.

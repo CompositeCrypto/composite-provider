@@ -18,6 +18,11 @@ Module-Lattice-Based Digital Signature Algorithm (ML-DSA, formerly Dilithium) co
 - **ML-DSA-87-RSA4096**: ML-DSA-87 + RSA-4096
 - **ML-DSA-87-ECDSA-P521**: ML-DSA-87 + ECDSA with P-521 curve
 
+Composite signature keys support unencrypted PKCS#8 `PrivateKeyInfo` export
+in PEM and DER. DER encoding also enables `EVP_PKEY2PKCS8` and encrypted
+PKCS#12 creation through `PKCS12_create`. The `test_sig_pkcs8` regression test
+checks key and certificate round trips for all 18 signature algorithms.
+
 #### ML-KEM Composite Key Encapsulation
 Module-Lattice-Based Key-Encapsulation Mechanism (ML-KEM, formerly Kyber)
 combined with RSA-OAEP, ECDH, X25519 or X448 — the 12 algorithms of

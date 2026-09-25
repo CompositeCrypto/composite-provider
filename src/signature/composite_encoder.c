@@ -2,10 +2,10 @@
  * composite_encoder.c — PEM/DER encoder for composite key types
  *
  * Implements OSSL_OP_ENCODER for:
- *   - PrivateKeyInfo / PEM   (unencrypted PKCS#8)
- *   - SubjectPublicKeyInfo / PEM
+ *   - PrivateKeyInfo / PEM and DER   (unencrypted PKCS#8)
+ *   - SubjectPublicKeyInfo / PEM and DER
  *
- * All composite SIG algorithms share the same two dispatch tables; the
+ * All composite SIG algorithms share the same dispatch tables; the
  * per-algorithm OID is resolved at encode-time via OBJ_sn2nid() using the
  * key's composite_name field (which holds the algorithm SN).
  */
@@ -129,7 +129,7 @@ static ASN1_OBJECT *alg_obj_for_key(const COMPOSITE_KEY *key)
 }
 
 /* =========================================================================
- * PrivateKeyInfo / PEM encoder
+ * PrivateKeyInfo / PEM and DER encoders
  * ========================================================================= */
 
 static int composite_pki_does_selection(void *vctx, int selection)
@@ -159,11 +159,12 @@ static int composite_privkey_to_der(const COMPOSITE_KEY *key,
     return (int)raw_len;
 }
 
-static int composite_pki_pem_encode(void *vctx, OSSL_CORE_BIO *cout,
+static int composite_pki_encode(void *vctx, OSSL_CORE_BIO *cout,
                                     const void *key_in,
                                     const OSSL_PARAM key_abstract[],
                                     int selection,
-                                    OSSL_PASSPHRASE_CALLBACK *cb, void *cbarg)
+                                    OSSL_PASSPHRASE_CALLBACK *cb, void *cbarg,
+                                    int output_der)
 {
     COMPOSITE_ENC_CTX      *ctx    = (COMPOSITE_ENC_CTX *)vctx;
     const COMPOSITE_KEY    *key    = (const COMPOSITE_KEY *)key_in;
@@ -198,18 +199,39 @@ static int composite_pki_pem_encode(void *vctx, OSSL_CORE_BIO *cout,
         !PKCS8_pkey_set0(p8info, aobj, 0, V_ASN1_UNDEF, NULL, der, derlen)) {
         PKCS8_PRIV_KEY_INFO_free(p8info);
         ASN1_OBJECT_free(aobj);
-        OPENSSL_free(der);
+        OPENSSL_clear_free(der, (size_t)derlen);
         return 0;
     }
     /* aobj and der now owned by p8info */
 
     out = BIO_new_from_core_bio(ctx->provctx->libctx, cout);
     if (out != NULL) {
-        ret = PEM_write_bio_PKCS8_PRIV_KEY_INFO(out, p8info);
+        ret = output_der ? i2d_PKCS8_PRIV_KEY_INFO_bio(out, p8info)
+                         : PEM_write_bio_PKCS8_PRIV_KEY_INFO(out, p8info);
         BIO_free(out);
     }
     PKCS8_PRIV_KEY_INFO_free(p8info);
     return ret;
+}
+
+static int composite_pki_pem_encode(void *vctx, OSSL_CORE_BIO *cout,
+                                    const void *key_in,
+                                    const OSSL_PARAM key_abstract[],
+                                    int selection,
+                                    OSSL_PASSPHRASE_CALLBACK *cb, void *cbarg)
+{
+    return composite_pki_encode(vctx, cout, key_in, key_abstract,
+                                selection, cb, cbarg, 0);
+}
+
+static int composite_pki_der_encode(void *vctx, OSSL_CORE_BIO *cout,
+                                    const void *key_in,
+                                    const OSSL_PARAM key_abstract[],
+                                    int selection,
+                                    OSSL_PASSPHRASE_CALLBACK *cb, void *cbarg)
+{
+    return composite_pki_encode(vctx, cout, key_in, key_abstract,
+                                selection, cb, cbarg, 1);
 }
 
 static const OSSL_DISPATCH composite_pki_pem_encoder_functions[] = {
@@ -217,6 +239,16 @@ static const OSSL_DISPATCH composite_pki_pem_encoder_functions[] = {
     { OSSL_FUNC_ENCODER_FREECTX,        (void(*)(void))composite_enc_freectx        },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, (void(*)(void))composite_pki_does_selection },
     { OSSL_FUNC_ENCODER_ENCODE,         (void(*)(void))composite_pki_pem_encode     },
+    { OSSL_FUNC_ENCODER_IMPORT_OBJECT,  (void(*)(void))composite_enc_import_object  },
+    { OSSL_FUNC_ENCODER_FREE_OBJECT,    (void(*)(void))composite_enc_free_object    },
+    OSSL_DISPATCH_END
+};
+
+static const OSSL_DISPATCH composite_pki_der_encoder_functions[] = {
+    { OSSL_FUNC_ENCODER_NEWCTX,         (void(*)(void))composite_enc_newctx         },
+    { OSSL_FUNC_ENCODER_FREECTX,        (void(*)(void))composite_enc_freectx        },
+    { OSSL_FUNC_ENCODER_DOES_SELECTION, (void(*)(void))composite_pki_does_selection },
+    { OSSL_FUNC_ENCODER_ENCODE,         (void(*)(void))composite_pki_der_encode     },
     { OSSL_FUNC_ENCODER_IMPORT_OBJECT,  (void(*)(void))composite_enc_import_object  },
     { OSSL_FUNC_ENCODER_FREE_OBJECT,    (void(*)(void))composite_enc_free_object    },
     OSSL_DISPATCH_END
@@ -394,7 +426,10 @@ static const OSSL_DISPATCH composite_spki_der_encoder_functions[] = {
 #define PKI_ENC(names) \
     { names, \
       "provider=composite,output=pem,structure=PrivateKeyInfo", \
-      composite_pki_pem_encoder_functions, NULL }
+      composite_pki_pem_encoder_functions, NULL }, \
+    { names, \
+      "provider=composite,output=der,structure=PrivateKeyInfo", \
+      composite_pki_der_encoder_functions, NULL }
 
 #define SPKI_ENC(names) \
     { names, \
